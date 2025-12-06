@@ -72,5 +72,5 @@ Path: C:\Users\<USER>\AppData\Local\Programs\Python\Python310\python.exe
 Arguments: -m uvicorn ioc_service:app --host 0.0.0.0 --port 8000
 Startup Dir: C:\PythonIocService
 Environment:
-```PATH=C:\Users\<USER>\AppData\Local\Programs\Python\Python310;C:\Users\<USER>\AppData\Local\Programs\Python\Python310\Scripts
-PYTHONPATH=C:\PythonIocService```
+PATH=C:\Users\<USER>\AppData\Local\Programs\Python\Python310;C:\Users\<USER>\AppData\Local\Programs\Python\Python310\Scripts
+PYTHONPATH=C:\PythonIocService
