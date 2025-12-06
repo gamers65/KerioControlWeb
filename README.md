@@ -45,6 +45,8 @@
 - HttpClient, Newtonsoft.Json
 - Поддержка Windows и Linux
 
+---
+
 ## 🚀 Быстрый старт
 
 ### 1️⃣ Установка и запуск
@@ -64,7 +66,7 @@
 ```powershell
 & "C:\Users\<USER>\AppData\Local\Programs\Python\Python310\python.exe" -m pip install fastapi uvicorn PyPDF2 python-multipart
 ```
-###3️⃣ NSSM — создание службы
+### 3️⃣ NSSM — создание службы
 1. Имя: IocPythonService
 2. Path: C:\Users\<USER>\AppData\Local\Programs\Python\Python310\python.exe
 3. Arguments: -m uvicorn ioc_service:app --host 0.0.0.0 --port 8000
