@@ -1,0 +1,173 @@
+﻿@model KerioControlWeb.Models.LoginModel
+@{
+    ViewData["Title"] = "Вход";
+}
+<style>
+    :root {
+        --primary: #4361ee;
+        --success: #06d6a0;
+        --warning: #ff9f1c;
+        --danger: #ef476f;
+        --dark: #2a2a3b;
+        --light: #f8f9fa;
+        --gray-100: #f1f3f5;
+        --gray-200: #e9ecef;
+        --gray-600: #6c757d;
+        --gray-800: #343a40;
+    }
+
+    html, body {
+        height: 100%;
+        margin: 0;
+        overflow: hidden;
+    }
+
+    body {
+        background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+    }
+
+    main {
+        padding-top: 0 !important;
+        padding-bottom: 0 !important;
+    }
+
+    .card {
+        border: none;
+        border-radius: 1rem;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+
+        .card:hover {
+            box-shadow: 0 20px 40px rgba(67, 97, 238, 0.25) !important;
+        }
+
+    .card-header {
+        background: linear-gradient(135deg, var(--primary), #3f37c9) !important;
+        border-bottom: 0;
+        padding: 1.5rem;
+    }
+
+    .btn-primary {
+        background: var(--primary);
+        border: none;
+        color: white;
+        border-radius: 0.85rem;
+        font-weight: 700;
+        padding: 0.85rem 1.8rem;
+        transition: all 0.25s ease;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        position: relative;
+        overflow: hidden;
+    }
+
+        .btn-primary:hover {
+            background: #3a56e0;
+            transform: translateY(-4px) scale(1.03);
+            box-shadow: 0 10px 25px rgba(67, 97, 238, 0.4);
+        }
+
+    .btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 50%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3));
+        transition: 0.6s;
+    }
+
+    .btn:hover::before {
+        left: 100%;
+    }
+
+    .form-control {
+        border-radius: 0.75rem;
+        padding: 0.9rem 1rem;
+        border: 2px solid var(--gray-200);
+        transition: all 0.3s ease;
+    }
+
+        .form-control:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 0.3rem rgba(67, 97, 238, 0.25);
+        }
+
+    .glass-card {
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(12px);
+    }
+
+    .pulse {
+        animation: pulse 2s infinite;
+    }
+
+    <text >
+    @@keyframes pulse {
+        0%
+
+    {
+        box-shadow: 0 0 0 0 rgba(67, 97, 238, 0.5);
+    }
+
+    70% {
+        box-shadow: 0 0 0 14px rgba(67, 97, 238, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(67, 97, 238, 0);
+    }
+
+    }
+
+    </text >
+    .text-danger {
+        font-size: 0.875rem;
+    }
+</style>
+<div class="d-flex align-items-start justify-content-center" style="height: calc(100vh - 70px); padding-top: 3rem;">
+    <div class="col-md-6 col-lg-4">
+        <div class="card shadow-lg glass-card">
+            <div class="card-header text-white text-center">
+                <h4 class="mb-0 d-flex align-items-center justify-content-center gap-3">
+                    <i class="fas fa-lock fa-lg pulse"></i>
+                    Вход в систему
+                </h4>
+            </div>
+            <div class="card-body p-4">
+                <form asp-action="Login" method="post">
+                    @Html.AntiForgeryToken()
+                    <div class="mb-3">
+                        <label asp-for="IpAddress" class="form-label fw-bold">IP-адрес сервера</label>
+                        <input asp-for="IpAddress" class="form-control form-control-lg" placeholder="192.168.50.1" />
+                        <span asp-validation-for="IpAddress" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Username" class="form-label fw-bold">Логин</label>
+                        <input asp-for="Username" class="form-control form-control-lg" placeholder="admin" />
+                        <span asp-validation-for="Username" class="text-danger"></span>
+                    </div>
+                    <div class="mb-4">
+                        <label asp-for="Password" class="form-label fw-bold">Пароль</label>
+                        <input asp-for="Password" type="password" class="form-control form-control-lg" />
+                        <span asp-validation-for="Password" class="text-danger"></span>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-lg w-100">
+                        <i class="fas fa-sign-in-alt me-2"></i>Подключиться
+                    </button>
+                </form>
+                @if (TempData["Error"] != null)
+                {
+                    <div class="alert alert-danger mt-3">
+                        @TempData["Error"]
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.3/jquery.validate.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/3.2.12/jquery.validate.unobtrusive.min.js"></script>
+}

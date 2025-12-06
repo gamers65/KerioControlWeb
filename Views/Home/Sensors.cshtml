@@ -1,0 +1,1657 @@
+﻿@model SensorsViewModel
+@{
+    ViewData["Title"] = "Сенсоры";
+}
+<style>
+    :root {
+        --primary: #4361ee;
+        --success: #06d6a0;
+        --warning: #ff9f1c;
+        --danger: #ef476f;
+        --dark: #2a2a3b;
+        --light: #f8f9fa;
+        --gray-100: #f1f3f5;
+        --gray-200: #e9ecef;
+        --gray-600: #6c757d;
+        --gray-800: #343a40;
+    }
+
+    body {
+        background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+        min-height: 100vh;
+    }
+
+    .card {
+        border: none;
+        border-radius: 1rem;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+
+        .card:hover {
+            box-shadow: 0 20px 40px rgba(67, 97, 238, 0.25) !important;
+        }
+
+    .card-header {
+        background: linear-gradient(135deg, var(--primary), #3f37c9) !important;
+        border-bottom: 0;
+        padding: 1.5rem;
+    }
+
+        .card-header.bg-success {
+            background: linear-gradient(135deg, var(--success), #06b68a) !important;
+        }
+
+    /* === ОСНОВНЫЕ КНОПКИ — уменьшенный размер === */
+    .btn {
+        border-radius: 0.5rem;
+        font-weight: 600;
+        padding: 0.5rem 1rem;
+        transition: all 0.25s ease;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        position: relative;
+        overflow: hidden;
+        font-size: 0.875rem;
+    }
+
+    .btn-primary {
+        background: var(--primary);
+        border: none;
+        color: white;
+    }
+
+        .btn-primary:hover {
+            background: #3a56e0;
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 6px 15px rgba(67, 97, 238, 0.4);
+        }
+
+    .btn-success {
+        background: #198754;
+        border: none;
+        color: white;
+    }
+
+        .btn-success:hover {
+            background: #05c291;
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 6px 15px rgba(6, 214, 160, 0.4);
+        }
+
+    /* Лёгкий "блеск" при наведении */
+    .btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 50%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3));
+        transition: 0.6s;
+    }
+
+    .btn:hover::before {
+        left: 100%;
+    }
+
+    /* === МАЛЕНЬКИЕ КНОПКИ (btn-sm) === */
+    .btn-sm {
+        border-radius: 0.375rem;
+        font-weight: 500;
+        padding: 0.375rem 0.75rem;
+        font-size: 0.8125rem;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+    }
+
+        .btn-sm:hover {
+            transform: translateY(-1px) scale(1.01);
+            box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+        }
+
+    /* === ОЧЕНЬ МАЛЕНЬКИЕ КНОПКИ (btn-xs) === */
+    .btn-xs {
+        border-radius: 0.25rem;
+        font-weight: 500;
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+        .btn-xs:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+        }
+
+    .form-control, .form-select {
+        border-radius: 0.75rem;
+        padding: 0.9rem 1rem;
+        border: 2px solid var(--gray-200);
+        transition: all 0.3s ease;
+    }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 0.3rem rgba(67, 97, 238, 0.25);
+        }
+
+    .glass-card {
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(12px);
+    }
+
+    .pulse {
+        animation: pulse 2s infinite;
+    }
+
+    <text >
+    @@keyframes pulse {
+        0%
+
+    {
+        box-shadow: 0 0 0 0 rgba(67, 97, 238, 0.5);
+    }
+
+    70% {
+        box-shadow: 0 0 0 14px rgba(67, 97, 238, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(67, 97, 238, 0);
+    }
+
+    }
+
+    @@keyframes float {
+        0%, 100% {
+            transform: translateY(0);
+        }
+
+        50% {
+            transform: translateY(-10px);
+        }
+    }
+
+    </text >
+
+    code {
+        background: var(--gray-100);
+        padding: 0.2rem 0.5rem;
+        border-radius: 0.5rem;
+        font-size: 0.9em;
+    }
+
+    .table {
+        --bs-table-hover-bg: rgba(67, 97, 238, 0.08);
+    }
+
+        .table th {
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+        }
+
+        .table td {
+            vertical-align: middle;
+        }
+
+    .badge {
+        font-size: 0.9em;
+        padding: 0.5em 1em;
+    }
+
+    /* Кнопки управления */
+    .btn-xs {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+    }
+
+    .group-actions {
+        display: flex;
+        gap: 0.3rem;
+        justify-content: flex-end;
+    }
+    /* Добавь в CSS */
+    .card-body .text-warning {
+        font-size: 0.75rem;
+        margin-top: 0.25rem;
+    }
+
+        .card-body .text-warning i {
+            font-size: 0.7rem;
+        }
+
+    /* === АНИМАЦИИ ДЛЯ УВЕДОМЛЕНИЙ === */
+    @@keyframes slideInRight {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+
+    @@keyframes fadeOut {
+        from {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        to {
+            opacity: 0;
+            transform: translateX(100%);
+        }
+    }
+
+    /* === СТИЛИ ДЛЯ УВЕДОМЛЕНИЙ === */
+    .notification {
+        min-width: 300px;
+        background: white;
+        border-radius: 0.75rem;
+        padding: 1rem 1.25rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        border-left: 5px solid;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        animation: slideInRight 0.3s ease, fadeOut 0.3s ease 2.7s forwards;
+        position: relative;
+        overflow: hidden;
+    }
+
+        .notification::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: currentColor;
+            opacity: 0.3;
+        }
+
+        .notification.success {
+            border-left-color: var(--success);
+            color: #1d7a45;
+        }
+
+        .notification.warning {
+            border-left-color: var(--warning);
+            color: #b56c0e;
+        }
+
+        .notification.error {
+            border-left-color: var(--danger);
+            color: #c53030;
+        }
+
+        .notification.info {
+            border-left-color: var(--primary);
+            color: #2c5aa0;
+        }
+
+        .notification i {
+            font-size: 1.4rem;
+            flex-shrink: 0;
+        }
+
+    .notification-content {
+        flex-grow: 1;
+    }
+
+    .notification-title {
+        font-weight: 700;
+        font-size: 0.95rem;
+        margin-bottom: 2px;
+    }
+
+    .notification-message {
+        font-size: 0.85rem;
+        opacity: 0.9;
+    }
+
+    /* Стиль для кнопки закрытия */
+    .notification .btn-close {
+        padding: 0.5rem;
+        opacity: 0.7;
+        transition: opacity 0.2s ease;
+    }
+
+        .notification .btn-close:hover {
+            opacity: 1;
+        }
+
+</style>
+
+<!-- Модальное окно для скачивания URL групп -->
+<div class="modal fade" id="downloadUrlGroupsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-success">
+                <h5 class="modal-title">
+                    <i class="fas fa-download me-2"></i>Скачать группы URL
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-check-label">
+                        <input type="checkbox" class="form-check-input" id="includeDescriptionUrl">
+                        Включать Description через запятую (URL,Description)
+                    </label>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6>Выберите группы для скачивания:</h6>
+                    <button class="btn btn-sm btn-outline-secondary" id="selectAllUrlGroups">
+                        <i class="fas fa-check-double me-1"></i>Выбрать все
+                    </button>
+                </div>
+
+                <div class="groups-list" style="max-height: 400px; overflow-y: auto;">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th width="50">
+                                    <input type="checkbox" id="selectAllUrlCheckbox">
+                                </th>
+                                <th>Название группы</th>
+                                <th class="text-end">Кол-во URL</th>
+                            </tr>
+                        </thead>
+                        <tbody id="downloadUrlGroupsList">
+                            <!-- Список URL групп будет заполнен JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i>Отмена
+                </button>
+                <button type="button" class="btn btn-success" id="downloadSelectedUrlGroups">
+                    <i class="fas fa-download me-1"></i>Скачать выбранные
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно для скачивания IP групп -->
+<div class="modal fade" id="downloadIpGroupsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-success">
+                <h5 class="modal-title">
+                    <i class="fas fa-download me-2"></i>Скачать группы IP-адресов
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-check-label">
+                        <input type="checkbox" class="form-check-input" id="includeDescription">
+                        Включать Description через запятую (адрес,Description)
+                    </label>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6>Выберите группы для скачивания:</h6>
+                    <button class="btn btn-sm btn-outline-secondary" id="selectAllGroups">
+                        <i class="fas fa-check-double me-1"></i>Выбрать все
+                    </button>
+                </div>
+
+                <div class="groups-list" style="max-height: 400px; overflow-y: auto;">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th width="50">
+                                    <input type="checkbox" id="selectAllCheckbox">
+                                </th>
+                                <th>Название группы</th>
+                                <th class="text-end">Кол-во адресов</th>
+                            </tr>
+                        </thead>
+                        <tbody id="downloadGroupsList">
+                            <!-- Список групп будет заполнен JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i>Отмена
+                </button>
+                <button type="button" class="btn btn-success" id="downloadSelectedGroups">
+                    <i class="fas fa-download me-1"></i>Скачать выбранные
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно для скрытых групп -->
+<div class="modal fade" id="hiddenGroupsModal" tabindex="-1" aria-labelledby="hiddenGroupsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title" id="hiddenGroupsModalLabel">
+                    <i class="fas fa-eye-slash me-2"></i>Скрытые группы
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="card bg-light">
+                            <div class="card-body py-3">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-ban text-primary fs-4 me-3"></i>
+                                    <div>
+                                        <h4 class="mb-0 fw-bold" id="hiddenIpGroupsCount">0</h4>
+                                        <small class="text-muted">Скрытых IP-групп</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card bg-light">
+                            <div class="card-body py-3">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-eye-slash text-primary fs-4 me-3"></i>
+                                    <div>
+                                        <h4 class="mb-0 fw-bold" id="hiddenUrlGroupsCount">0</h4>
+                                        <small class="text-muted">Скрытых URL-групп</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <ul class="nav nav-tabs mb-3" id="hiddenGroupsTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="ip-tab" data-bs-toggle="tab" data-bs-target="#ip-groups" type="button" role="tab">
+                            <i class="fas fa-network-wired me-1"></i>IP-группы
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="url-tab" data-bs-toggle="tab" data-bs-target="#url-groups" type="button" role="tab">
+                            <i class="fas fa-cloud me-1"></i>URL-группы
+                        </button>
+                    </li>
+                </ul>
+
+                <div class="tab-content" id="hiddenGroupsTabContent">
+                    <div class="tab-pane fade show active" id="ip-groups" role="tabpanel">
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Название группы</th>
+                                        <th class="text-end">Действия</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="hiddenIpGroupsList">
+                                    <!-- Список скрытых IP-групп -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <div id="emptyHiddenIpGroups" class="text-center py-4 text-muted d-none">
+                            <i class="fas fa-inbox fa-2x mb-2"></i>
+                            <p>Нет скрытых IP-групп</p>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="url-groups" role="tabpanel">
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Название группы</th>
+                                        <th class="text-end">Действия</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="hiddenUrlGroupsList">
+                                    <!-- Список скрытых URL-групп -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <div id="emptyHiddenUrlGroups" class="text-center py-4 text-muted d-none">
+                            <i class="fas fa-inbox fa-2x mb-2"></i>
+                            <p>Нет скрытых URL-групп</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i>Закрыть
+                </button>
+                <button type="button" class="btn btn-warning" id="restoreAllHiddenGroups">
+                    <i class="fas fa-eye me-1"></i>Восстановить все
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container py-7">
+    <!-- Заголовок с кнопками управления -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        @*      <div>
+        <h1 class="display-7 fw-bold text-primary mb-1">
+        <i class="fas fa-shield-alt me-3"></i>Группы адресов
+        </h1>
+        <p class="lead text-muted mb-0">Управление группами IP и URL адресов</p>
+        </div> *@
+        <div class="d-flex gap-2">
+            <button type="button" class="btn btn-warning" id="viewHiddenGroupsBtn">
+                <i class="fas fa-eye-slash me-1"></i>Скрытые группы
+                <span class="badge bg-warning text-dark ms-1" id="totalHiddenGroupsBadge">0</span>
+            </button>
+            <button type="button" class="btn btn-info" id="refreshGroupsBtn">
+                <i class="fas fa-sync-alt me-1"></i>Обновить
+            </button>
+        </div>
+    </div>
+
+    <!-- Статистика общая -->
+    <div class="row g-5 mb-5">
+        <div class="col-md-6 col-lg-3">
+            <div class="card shadow-lg glass-card h-100">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <i class="fas fa-sitemap text-primary fs-1"></i>
+                    <div>
+                        <h2 class="fw-bold mb-0" id="ipGroupsCount">@Model.IpGroups.Count</h2>
+                        <p class="text-muted mb-0">
+                            групп IP-адресов
+                            <small class="d-block text-primary" id="hiddenIpGroupsText" style="display: none !important;">
+                                <i class="fas fa-eye-slash"></i> <span id="hiddenIpGroupsCountText">0</span> скрыто
+                            </small>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="card shadow-lg glass-card h-100">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <i class="fas fa-globe text-success fs-1"></i>
+                    <div>
+                        <h2 class="fw-bold mb-0" id="ipItemsCount">@Model.TotalIpItems</h2>
+                        <p class="text-muted mb-0">
+                            IP-адресов всего
+                            <small class="d-block text-primary" id="hiddenIpItemsText" style="display: none !important;">
+                                <i class="fas fa-eye-slash"></i> <span id="hiddenIpItemsCountText">0</span> скрыто
+                            </small>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="card shadow-lg glass-card h-100">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <i class="fas fa-link text-info fs-1"></i>
+                    <div>
+                        <h2 class="fw-bold mb-0" id="urlGroupsCount">@Model.UrlGroups.Count</h2>
+                        <p class="text-muted mb-0">
+                            групп URL
+                            <small class="d-block text-primary" id="hiddenUrlGroupsText" style="display: none !important;">
+                                <i class="fas fa-eye-slash"></i> <span id="hiddenUrlGroupsCountText">0</span> скрыто
+                            </small>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="card shadow-lg glass-card h-100">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <i class="fas fa-link text-primary fs-1"></i>
+                    <div>
+                        <h2 class="fw-bold mb-0" id="urlItemsCount">@Model.TotalUrlItems</h2>
+                        <p class="text-muted mb-0">
+                            URL всего
+                            <small class="d-block text-primary" id="hiddenUrlItemsText" style="display: none !important;">
+                                <i class="fas fa-eye-slash"></i> <span id="hiddenUrlItemsCountText">0</span> скрыто
+                            </small>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-5">
+        <!-- IP-группы -->
+        <div class="col-lg-6">
+            <div class="card shadow-lg h-100 glass-card">
+                <div class="card-header text-white text-center position-relative">
+                    <h4 class="mb-0 d-flex align-items-center justify-content-center gap-3">
+                        <i class="fas fa-network-wired fa-lg"></i>
+                        Группы IP-адресов
+                        <button class="btn btn-sm btn-outline-light" id="downloadIpGroupsBtn" title="Скачать группы">
+                            <i class="fas fa-download"></i>
+                        </button>
+                    </h4>
+                </div>
+                <div class="card-body p-4">
+                    <div class="table-responsive">
+                        <!-- Таблица IP групп -->
+                        <table id="ipGroupsTable" class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Название группы</th>
+                                    <th class="text-end">Кол-во элементов</th>
+                                    <th width="100" class="text-end">Действия</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ipGroupsTableBody">
+                                @foreach (var group in Model.IpGroups.Where(g => g.ItemCount > 0))
+                                {
+                                    <tr data-group-name="@group.GroupName" data-group-type="ip" data-item-count="@group.ItemCount">
+                                        <td>
+                                            @if (string.IsNullOrWhiteSpace(group.GroupName))
+                                            {
+                                                <strong class="text-danger">
+                                                    <i class="fas fa-exclamation-triangle me-1"></i>Без названия
+                                                </strong>
+                                            }
+                                            else
+                                            {
+                                                <strong>@group.GroupName</strong>
+                                            }
+                                        </td>
+                                        <td class="text-end">
+                                            <span class="badge bg-primary rounded-pill px-3">
+                                                @group.ItemCount
+                                            </span>
+                                        </td>
+                                        <td class="text-end">
+                                            <div class="group-actions">
+                                                <button class="btn btn-sm btn-outline-info hide-group-btn"
+                                                        title="Скрыть группу">
+                                                    <i class="fas fa-eye-slash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+
+                        <!-- Сообщение когда нет групп -->
+                        <div id="emptyIpGroups" class="text-center py-5 text-muted d-none">
+                            Нет активных IP-групп
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer text-muted small text-center">
+                    Всего IP-адресов в группах: <strong id="totalIpItemsFooter">@Model.TotalIpItems</strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- URL-группы -->
+        <div class="col-lg-6">
+            <div class="card shadow-lg h-100 glass-card">
+                <div class="card-header bg-success text-white text-center">
+                    <h4 class="mb-0 d-flex align-items-center justify-content-center gap-3">
+                        <i class="fas fa-cloud fa-lg"></i>
+                        Группы URL
+                        <button class="btn btn-sm btn-outline-light" id="downloadUrlGroupsBtn" title="Скачать группы">
+                            <i class="fas fa-download"></i>
+                        </button>
+                    </h4>
+                </div>
+                <div class="card-body p-4">
+                    <div class="table-responsive">
+                        <!-- Таблица URL групп -->
+                        <table id="urlGroupsTable" class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Название группы</th>
+                                    <th class="text-end">Кол-во элементов</th>
+                                    <th width="100" class="text-end">Действия</th>
+                                </tr>
+                            </thead>
+                            <tbody id="urlGroupsTableBody">
+                                @foreach (var group in Model.UrlGroups.Where(g => g.ItemCount > 0))
+                                {
+                                    <tr data-group-name="@group.GroupName" data-group-type="url" data-item-count="@group.ItemCount">
+                                        <td>
+                                            @if (string.IsNullOrWhiteSpace(group.GroupName))
+                                            {
+                                                <strong class="text-danger">
+                                                    <i class="fas fa-exclamation-triangle me-1"></i>Без названия
+                                                </strong>
+                                            }
+                                            else
+                                            {
+                                                <strong>@group.GroupName</strong>
+                                            }
+                                        </td>
+                                        <td class="text-end">
+                                            <span class="badge bg-success rounded-pill px-3">
+                                                @group.ItemCount
+                                            </span>
+                                        </td>
+                                        <td class="text-end">
+                                            <div class="group-actions">
+                                                <button class="btn btn-sm btn-outline-info hide-group-btn"
+                                                        title="Скрыть группу">
+                                                    <i class="fas fa-eye-slash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+
+                        <!-- Сообщение когда нет групп -->
+                        <div id="emptyUrlGroups" class="text-center py-5 text-muted d-none">
+                            Нет активных URL-групп
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer text-muted small text-center">
+                    Всего URL в группах: <strong id="totalUrlItemsFooter">@Model.TotalUrlItems</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Хранилище скрытых групп
+        let hiddenGroups = {
+            ip: [],
+            url: []
+        };
+
+        // ========== БЕЗОПАСНАЯ ИНИЦИАЛИЗАЦИЯ ==========
+
+        // Функция для безопасной инициализации hiddenGroups
+        function initializeHiddenGroups() {
+            try {
+                // Пытаемся загрузить из localStorage
+                const storedIpGroups = localStorage.getItem('hiddenIpGroups');
+                const storedUrlGroups = localStorage.getItem('hiddenUrlGroups');
+
+                // Убеждаемся что данные валидны
+                if (storedIpGroups) {
+                    const parsed = JSON.parse(storedIpGroups);
+                    hiddenGroups.ip = Array.isArray(parsed) ? parsed : [];
+                } else {
+                    hiddenGroups.ip = [];
+                }
+
+                if (storedUrlGroups) {
+                    const parsed = JSON.parse(storedUrlGroups);
+                    hiddenGroups.url = Array.isArray(parsed) ? parsed : [];
+                } else {
+                    hiddenGroups.url = [];
+                }
+
+                console.log('📁 Загружены скрытые группы:', hiddenGroups);
+            } catch (error) {
+                console.error('❌ Ошибка загрузки скрытых групп из localStorage:', error);
+                // Сбрасываем к пустым массивам при ошибке
+                hiddenGroups.ip = [];
+                hiddenGroups.url = [];
+            }
+        }
+
+        // Функция для получения информации о группах непосредственно из DOM
+        function getGroupsInfoFromDOM() {
+            console.log('🔍 Получение данных о группах из DOM...');
+
+            const groupsInfo = { ip: {}, url: {} };
+
+            // Собираем информацию о IP группах
+            $('[data-group-type="ip"]').each(function () {
+                const groupName = $(this).data('group-name');
+                const itemCount = parseInt($(this).data('item-count')) || 0;
+                groupsInfo.ip[groupName] = itemCount;
+            });
+
+            // Собираем информацию о URL группах
+            $('[data-group-type="url"]').each(function () {
+                const groupName = $(this).data('group-name');
+                const itemCount = parseInt($(this).data('item-count')) || 0;
+                groupsInfo.url[groupName] = itemCount;
+            });
+
+            return groupsInfo;
+        }
+
+        // Функция для проверки, скрыта ли группа (с проверками безопасности)
+        function isGroupHidden(groupName, groupType) {
+            const hiddenList = hiddenGroups[groupType];
+
+            // Проверяем что hiddenList существует и является массивом
+            if (!hiddenList || !Array.isArray(hiddenList)) {
+                console.warn(`⚠️ hiddenGroups.${groupType} не является массивом:`, hiddenList);
+                return false;
+            }
+
+            return hiddenList.some(hiddenName =>
+                hiddenName == groupName ||
+                String(hiddenName) === String(groupName)
+            );
+        }
+
+        // ========== ОСНОВНЫЕ ФУНКЦИИ ОБНОВЛЕНИЯ ИНТЕРФЕЙСА ==========
+
+        function updateStatistics() {
+            try {
+                const totalIpGroups = $('[data-group-type="ip"]').length;
+                const totalUrlGroups = $('[data-group-type="url"]').length;
+
+                let totalIpItems = 0;
+                let totalUrlItems = 0;
+
+                $('[data-group-type="ip"]').each(function () {
+                    totalIpItems += parseInt($(this).data('item-count')) || 0;
+                });
+
+                $('[data-group-type="url"]').each(function () {
+                    totalUrlItems += parseInt($(this).data('item-count')) || 0;
+                });
+
+                const visibleIpGroups = $('[data-group-type="ip"]:visible').length;
+                const visibleUrlGroups = $('[data-group-type="url"]:visible').length;
+
+                let visibleIpItems = 0;
+                let visibleUrlItems = 0;
+
+                $('[data-group-type="ip"]:visible').each(function () {
+                    visibleIpItems += parseInt($(this).data('item-count')) || 0;
+                });
+
+                $('[data-group-type="url"]:visible').each(function () {
+                    visibleUrlItems += parseInt($(this).data('item-count')) || 0;
+                });
+
+                // Обновляем UI
+                $('#ipGroupsCount').text(totalIpGroups);
+                $('#urlGroupsCount').text(totalUrlGroups);
+                $('#ipItemsCount').text(totalIpItems);
+                $('#urlItemsCount').text(totalUrlItems);
+
+                const hiddenIpGroupsCount = Array.isArray(hiddenGroups.ip) ? hiddenGroups.ip.length : 0;
+                const hiddenUrlGroupsCount = Array.isArray(hiddenGroups.url) ? hiddenGroups.url.length : 0;
+                const hiddenIpItemsCount = totalIpItems - visibleIpItems;
+                const hiddenUrlItemsCount = totalUrlItems - visibleUrlItems;
+
+                $('#hiddenIpGroupsText').toggle(hiddenIpGroupsCount > 0);
+                $('#hiddenIpGroupsCountText').text(hiddenIpGroupsCount);
+                $('#hiddenUrlGroupsText').toggle(hiddenUrlGroupsCount > 0);
+                $('#hiddenUrlGroupsCountText').text(hiddenUrlGroupsCount);
+
+                $('#hiddenIpItemsText').toggle(hiddenIpItemsCount > 0);
+                $('#hiddenIpItemsCountText').text(hiddenIpItemsCount);
+                $('#hiddenUrlItemsText').toggle(hiddenUrlItemsCount > 0);
+                $('#hiddenUrlItemsCountText').text(hiddenUrlItemsCount);
+
+                $('#totalIpItemsFooter').text(visibleIpItems);
+                $('#totalUrlItemsFooter').text(visibleUrlItems);
+
+                updateEmptyGroupsMessages();
+            } catch (error) {
+                console.error('❌ Ошибка в updateStatistics:', error);
+            }
+        }
+
+        function updateEmptyGroupsMessages() {
+            try {
+                const visibleIpGroups = $('[data-group-type="ip"]:visible').length;
+                const hasIpGroups = $('[data-group-type="ip"]').length > 0;
+                const visibleUrlGroups = $('[data-group-type="url"]:visible').length;
+                const hasUrlGroups = $('[data-group-type="url"]').length > 0;
+
+                if (hasIpGroups && visibleIpGroups === 0) {
+                    $('#emptyIpGroups').removeClass('d-none').show();
+                    $('#ipGroupsTable').hide();
+                } else if (!hasIpGroups) {
+                    $('#emptyIpGroups').removeClass('d-none').show();
+                    $('#ipGroupsTable').hide();
+                } else {
+                    $('#emptyIpGroups').addClass('d-none').hide();
+                    $('#ipGroupsTable').show();
+                }
+
+                if (hasUrlGroups && visibleUrlGroups === 0) {
+                    $('#emptyUrlGroups').removeClass('d-none').show();
+                    $('#urlGroupsTable').hide();
+                } else if (!hasUrlGroups) {
+                    $('#emptyUrlGroups').removeClass('d-none').show();
+                    $('#urlGroupsTable').hide();
+                } else {
+                    $('#emptyUrlGroups').addClass('d-none').hide();
+                    $('#urlGroupsTable').show();
+                }
+            } catch (error) {
+                console.error('❌ Ошибка в updateEmptyGroupsMessages:', error);
+            }
+        }
+
+        function saveHiddenGroups() {
+            try {
+                // Убеждаемся что это массивы перед сохранением
+                if (!Array.isArray(hiddenGroups.ip)) {
+                    console.warn('⚠️ hiddenGroups.ip не массив перед сохранением, сбрасываем:', hiddenGroups.ip);
+                    hiddenGroups.ip = [];
+                }
+
+                if (!Array.isArray(hiddenGroups.url)) {
+                    console.warn('⚠️ hiddenGroups.url не массив перед сохранением, сбрасываем:', hiddenGroups.url);
+                    hiddenGroups.url = [];
+                }
+
+                // Убираем дубликаты перед сохранением
+                hiddenGroups.ip = [...new Set(hiddenGroups.ip)];
+                hiddenGroups.url = [...new Set(hiddenGroups.url)];
+
+                localStorage.setItem('hiddenIpGroups', JSON.stringify(hiddenGroups.ip));
+                localStorage.setItem('hiddenUrlGroups', JSON.stringify(hiddenGroups.url));
+                updateVisibleGroups();
+                updateHiddenGroupsUI();
+            } catch (error) {
+                console.error('❌ Ошибка в saveHiddenGroups:', error);
+            }
+        }
+
+        function updateVisibleGroups() {
+            try {
+                $('[data-group-name]').each(function () {
+                    const groupName = $(this).data('group-name');
+                    const groupType = $(this).data('group-type');
+
+                    // Проверяем что groupType валидный
+                    if (groupType !== 'ip' && groupType !== 'url') {
+                        console.warn(`⚠️ Неизвестный тип группы: ${groupType}`);
+                        return;
+                    }
+
+                    const isHidden = isGroupHidden(groupName, groupType);
+                    $(this).toggle(!isHidden);
+                });
+                updateStatistics();
+            } catch (error) {
+                console.error('❌ Ошибка в updateVisibleGroups:', error);
+            }
+        }
+
+        function updateHiddenGroupsUI() {
+            try {
+                const totalHidden = (Array.isArray(hiddenGroups.ip) ? hiddenGroups.ip.length : 0) +
+                    (Array.isArray(hiddenGroups.url) ? hiddenGroups.url.length : 0);
+                $('#totalHiddenGroupsBadge').text(totalHidden);
+                updateHiddenGroupsModal();
+            } catch (error) {
+                console.error('❌ Ошибка в updateHiddenGroupsUI:', error);
+            }
+        }
+
+        function updateHiddenGroupsModal() {
+            try {
+                // IP группы
+                const $ipList = $('#hiddenIpGroupsList');
+                $ipList.empty();
+
+                if (Array.isArray(hiddenGroups.ip) && hiddenGroups.ip.length > 0) {
+                    $('#emptyHiddenIpGroups').addClass('d-none');
+                    // Убираем дубликаты при отображении
+                    const uniqueIpGroups = [...new Set(hiddenGroups.ip)];
+                    uniqueIpGroups.forEach(groupName => {
+                        $ipList.append(`
+                                                    <tr>
+                                                        <td>
+                                                            <strong>${groupName}</strong>
+                                                            <small class="text-muted d-block">IP-группа</small>
+                                                        </td>
+                                                        <td class="text-end">
+                                                            <button class="btn btn-sm btn-outline-success restore-group-btn"
+                                                                    data-group-name="${groupName}" data-group-type="ip">
+                                                                <i class="fas fa-eye me-1"></i>Восстановить
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                `);
+                    });
+                } else {
+                    $('#emptyHiddenIpGroups').removeClass('d-none');
+                }
+
+                // URL группы
+                const $urlList = $('#hiddenUrlGroupsList');
+                $urlList.empty();
+
+                if (Array.isArray(hiddenGroups.url) && hiddenGroups.url.length > 0) {
+                    $('#emptyHiddenUrlGroups').addClass('d-none');
+                    // Убираем дубликаты при отображении
+                    const uniqueUrlGroups = [...new Set(hiddenGroups.url)];
+                    uniqueUrlGroups.forEach(groupName => {
+                        $urlList.append(`
+                                                    <tr>
+                                                        <td>
+                                                            <strong>${groupName}</strong>
+                                                            <small class="text-muted d-block">URL-группа</small>
+                                                        </td>
+                                                        <td class="text-end">
+                                                            <button class="btn btn-sm btn-outline-success restore-group-btn"
+                                                                    data-group-name="${groupName}" data-group-type="url">
+                                                                <i class="fas fa-eye me-1"></i>Восстановить
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                `);
+                    });
+                } else {
+                    $('#emptyHiddenUrlGroups').removeClass('d-none');
+                }
+
+                $('#hiddenIpGroupsCount').text(Array.isArray(hiddenGroups.ip) ? [...new Set(hiddenGroups.ip)].length : 0);
+                $('#hiddenUrlGroupsCount').text(Array.isArray(hiddenGroups.url) ? [...new Set(hiddenGroups.url)].length : 0);
+            } catch (error) {
+                console.error('❌ Ошибка в updateHiddenGroupsModal:', error);
+            }
+        }
+
+        // ========== ФУНКЦИИ СИНХРОНИЗАЦИИ ==========
+
+        async function syncWithServer() {
+            try {
+                const response = await fetch('/Home/GetActualGroupsInfo');
+                if (response.ok) {
+                    const serverData = await response.json();
+
+                    // Убеждаемся что данные с сервера валидны
+                    const serverIpGroups = serverData.ipGroups || {};
+                    const serverUrlGroups = serverData.urlGroups || {};
+
+                    console.log('🔄 Синхронизация с сервером:', { serverIpGroups, serverUrlGroups });
+
+                    // Убираем скрытые группы, которых больше нет на сервере
+                    // Убеждаемся что hiddenGroups - это массивы
+                    if (Array.isArray(hiddenGroups.ip)) {
+                        hiddenGroups.ip = hiddenGroups.ip.filter(groupName => groupName in serverIpGroups);
+                    } else {
+                        console.warn('⚠️ hiddenGroups.ip не массив, сбрасываем:', hiddenGroups.ip);
+                        hiddenGroups.ip = [];
+                    }
+
+                    if (Array.isArray(hiddenGroups.url)) {
+                        hiddenGroups.url = hiddenGroups.url.filter(groupName => groupName in serverUrlGroups);
+                    } else {
+                        console.warn('⚠️ hiddenGroups.url не массив, сбрасываем:', hiddenGroups.url);
+                        hiddenGroups.url = [];
+                    }
+
+                    // Сохраняем обновленные скрытые группы
+                    localStorage.setItem('hiddenIpGroups', JSON.stringify(hiddenGroups.ip));
+                    localStorage.setItem('hiddenUrlGroups', JSON.stringify(hiddenGroups.url));
+
+                    // Обновляем интерфейс
+                    updateVisibleGroups();
+                    updateHiddenGroupsUI();
+
+                    console.log('✅ Данные синхронизированы с сервером');
+                } else {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+            } catch (error) {
+                console.error('❌ Ошибка синхронизации с сервером:', error);
+                throw error;
+            }
+        }
+
+        // ========== ФУНКЦИИ МОДАЛЬНЫХ ОКОН СКАЧИВАНИЯ ==========
+
+        function openModal(modalId, populateFunction) {
+            $('.modal').modal('hide');
+            setTimeout(() => {
+                if (populateFunction) {
+                    populateFunction();
+                }
+                $(modalId).modal('show');
+            }, 300);
+        }
+
+        function populateDownloadIpGroupsList() {
+            try {
+                const $list = $('#downloadGroupsList');
+                $list.empty();
+
+                const groupsInfo = getGroupsInfoFromDOM();
+                const ipGroups = Object.keys(groupsInfo.ip).map(groupName => ({
+                    name: groupName,
+                    count: groupsInfo.ip[groupName]
+                }));
+
+                ipGroups.sort((a, b) => String(a.name).localeCompare(String(b.name)));
+
+                ipGroups.forEach(group => {
+                    const displayName = group.name || 'Без названия';
+                    const isHidden = isGroupHidden(group.name, 'ip');
+
+                    $list.append(`
+                                                <tr>
+                                                    <td>
+                                                        <input type="checkbox" class="group-checkbox" data-group-name="${group.name}" checked>
+                                                    </td>
+                                                    <td>
+                                                        <strong>${displayName}</strong>
+                                                        ${isHidden ? '<small class="text-primary d-block"><i class="fas fa-eye-slash me-1"></i>Скрыта</small>' : ''}
+                                                    </td>
+                                                    <td class="text-end">
+                                                        <span class="badge bg-primary">${group.count}</span>
+                                                    </td>
+                                                </tr>
+                                            `);
+                });
+
+                updateSelectAllCheckbox();
+            } catch (error) {
+                console.error('❌ Ошибка в populateDownloadIpGroupsList:', error);
+            }
+        }
+
+        function updateSelectAllCheckbox() {
+            try {
+                const allCheckboxes = $('.group-checkbox');
+                const checkedCount = allCheckboxes.filter(':checked').length;
+                const selectAllCheckbox = $('#selectAllCheckbox');
+
+                if (checkedCount === allCheckboxes.length) {
+                    selectAllCheckbox.prop('checked', true);
+                    selectAllCheckbox.prop('indeterminate', false);
+                } else if (checkedCount === 0) {
+                    selectAllCheckbox.prop('checked', false);
+                    selectAllCheckbox.prop('indeterminate', false);
+                } else {
+                    selectAllCheckbox.prop('checked', false);
+                    selectAllCheckbox.prop('indeterminate', true);
+                }
+            } catch (error) {
+                console.error('❌ Ошибка в updateSelectAllCheckbox:', error);
+            }
+        }
+
+        function populateDownloadUrlGroupsList() {
+            try {
+                const $list = $('#downloadUrlGroupsList');
+                $list.empty();
+
+                const groupsInfo = getGroupsInfoFromDOM();
+                const urlGroups = Object.keys(groupsInfo.url).map(groupName => ({
+                    name: groupName,
+                    count: groupsInfo.url[groupName]
+                }));
+
+                urlGroups.sort((a, b) => String(a.name).localeCompare(String(b.name)));
+
+                urlGroups.forEach(group => {
+                    const displayName = group.name || 'Без названия';
+                    const isHidden = isGroupHidden(group.name, 'url');
+
+                    $list.append(`
+                                                <tr>
+                                                    <td>
+                                                        <input type="checkbox" class="url-group-checkbox" data-group-name="${group.name}" checked>
+                                                    </td>
+                                                    <td>
+                                                        <strong>${displayName}</strong>
+                                                        ${isHidden ? '<small class="text-primary d-block"><i class="fas fa-eye-slash me-1"></i>Скрыта</small>' : ''}
+                                                    </td>
+                                                    <td class="text-end">
+                                                        <span class="badge bg-success">${group.count}</span>
+                                                    </td>
+                                                </tr>
+                                            `);
+                });
+
+                updateSelectAllUrlCheckbox();
+            } catch (error) {
+                console.error('❌ Ошибка в populateDownloadUrlGroupsList:', error);
+            }
+        }
+
+        function updateSelectAllUrlCheckbox() {
+            try {
+                const allCheckboxes = $('.url-group-checkbox');
+                const checkedCount = allCheckboxes.filter(':checked').length;
+                const selectAllCheckbox = $('#selectAllUrlCheckbox');
+
+                if (checkedCount === allCheckboxes.length) {
+                    selectAllCheckbox.prop('checked', true);
+                    selectAllCheckbox.prop('indeterminate', false);
+                } else if (checkedCount === 0) {
+                    selectAllCheckbox.prop('checked', false);
+                    selectAllCheckbox.prop('indeterminate', false);
+                } else {
+                    selectAllCheckbox.prop('checked', false);
+                    selectAllCheckbox.prop('indeterminate', true);
+                }
+            } catch (error) {
+                console.error('❌ Ошибка в updateSelectAllUrlCheckbox:', error);
+            }
+        }
+
+        // ========== ФУНКЦИИ СКАЧИВАНИЯ С БЕЗОПАСНЫМ ОБНОВЛЕНИЕМ ==========
+
+        // Безопасная функция обновления
+        function safeRefresh() {
+            try {
+                $('#refreshGroupsBtn').click();
+            } catch (error) {
+                console.error('❌ Ошибка при безопасном обновлении:', error);
+                // Пытаемся хотя бы обновить UI
+                try {
+                    updateVisibleGroups();
+                    updateHiddenGroupsUI();
+                } catch (uiError) {
+                    console.error('❌ Ошибка при обновлении UI:', uiError);
+                }
+            }
+        }
+
+        async function downloadSelectedIpGroups() {
+            const selectedGroups = [];
+            $('.group-checkbox:checked').each(function () {
+                selectedGroups.push($(this).data('group-name'));
+            });
+
+            if (selectedGroups.length === 0) {
+                showNotification('warning', 'Внимание', 'Выберите хотя бы одну группу для скачивания');
+                return;
+            }
+
+            const includeDescription = $('#includeDescription').is(':checked');
+
+            try {
+                const $downloadBtn = $('#downloadSelectedGroups');
+                const originalHtml = $downloadBtn.html();
+                $downloadBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-1"></i>Подготовка...');
+
+                const params = new URLSearchParams();
+                selectedGroups.forEach(group => params.append('groupNames', group));
+                params.append('includeDescription', includeDescription);
+
+                const response = await fetch('/Home/DownloadIpGroups?' + params.toString());
+
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'ip_groups.zip';
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+
+                    showNotification('success', 'Успех', `Скачано ${selectedGroups.length} групп`);
+                    $('#downloadIpGroupsModal').modal('hide');
+
+                    // Безопасное обновление после успешного скачивания
+                    setTimeout(() => {
+                        safeRefresh();
+                    }, 1000);
+                } else {
+                    throw new Error('Ошибка сервера');
+                }
+            } catch (error) {
+                console.error('Ошибка скачивания:', error);
+                showNotification('error', 'Ошибка', 'Не удалось скачать группы');
+            } finally {
+                const $downloadBtn = $('#downloadSelectedGroups');
+                $downloadBtn.prop('disabled', false).html('<i class="fas fa-download me-1"></i>Скачать выбранные');
+            }
+        }
+
+        async function downloadSelectedUrlGroups() {
+            const selectedGroups = [];
+            $('.url-group-checkbox:checked').each(function () {
+                selectedGroups.push($(this).data('group-name'));
+            });
+
+            if (selectedGroups.length === 0) {
+                showNotification('warning', 'Внимание', 'Выберите хотя бы одну группу для скачивания');
+                return;
+            }
+
+            const includeDescription = $('#includeDescriptionUrl').is(':checked');
+
+            try {
+                const $downloadBtn = $('#downloadSelectedUrlGroups');
+                const originalHtml = $downloadBtn.html();
+                $downloadBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-1"></i>Подготовка...');
+
+                const params = new URLSearchParams();
+                selectedGroups.forEach(group => params.append('groupNames', group));
+                params.append('includeDescription', includeDescription);
+
+                const response = await fetch('/Home/DownloadUrlGroups?' + params.toString());
+
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'url_groups.zip';
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+
+                    showNotification('success', 'Успех', `Скачано ${selectedGroups.length} URL групп`);
+                    $('#downloadUrlGroupsModal').modal('hide');
+
+                    // Безопасное обновление после успешного скачивания
+                    setTimeout(() => {
+                        safeRefresh();
+                    }, 1000);
+                } else {
+                    throw new Error('Ошибка сервера');
+                }
+            } catch (error) {
+                console.error('Ошибка скачивания URL групп:', error);
+                showNotification('error', 'Ошибка', 'Не удалось скачать URL группы');
+            } finally {
+                const $downloadBtn = $('#downloadSelectedUrlGroups');
+                $downloadBtn.prop('disabled', false).html('<i class="fas fa-download me-1"></i>Скачать выбранные');
+            }
+        }
+
+        // ========== ОБРАБОТЧИКИ СОБЫТИЙ С БЕЗОПАСНЫМ ОБНОВЛЕНИЕМ ==========
+
+        $(document).ready(function () {
+            console.log('🚀 Инициализация страницы Sensors');
+
+            // Инициализируем скрытые группы
+            initializeHiddenGroups();
+
+            updateVisibleGroups();
+            updateHiddenGroupsUI();
+            console.log('✅ Страница инициализирована');
+        });
+
+        // Обработчики закрытия модальных окон скачивания
+        $(document).on('click', '#downloadIpGroupsModal .btn-secondary[data-bs-dismiss="modal"]', function () {
+            // Безопасное обновление после закрытия модального окна скачивания IP групп
+            setTimeout(() => {
+                safeRefresh();
+            }, 500);
+        });
+
+        $(document).on('click', '#downloadUrlGroupsModal .btn-secondary[data-bs-dismiss="modal"]', function () {
+            // Безопасное обновление после закрытия модального окна скачивания URL групп
+            setTimeout(() => {
+                safeRefresh();
+            }, 500);
+        });
+
+        // Обработчики скрытия модальных окон скачивания
+        $('#downloadIpGroupsModal').on('hidden.bs.modal', function () {
+            // Безопасное обновление после закрытия модального окна скачивания IP групп
+            setTimeout(() => {
+                safeRefresh();
+            }, 500);
+        });
+
+        $('#downloadUrlGroupsModal').on('hidden.bs.modal', function () {
+            // Безопасное обновление после закрытия модального окна скачивания URL групп
+            setTimeout(() => {
+                safeRefresh();
+            }, 500);
+        });
+
+        // Обработчик скрытия группы
+        $(document).on('click', '.hide-group-btn', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const $row = $(this).closest('tr');
+            const groupName = $row.data('group-name');
+            const groupType = $row.data('group-type');
+
+            console.log(`👁️ Скрытие группы: ${groupName}, тип: ${groupType}`);
+
+            // Проверяем, не скрыта ли уже группа
+            if (!isGroupHidden(groupName, groupType)) {
+                hiddenGroups[groupType].push(groupName);
+                saveHiddenGroups();
+                showNotification('info', 'Группа скрыта', `Группа "${groupName}" скрыта из общего списка`);
+
+                // Немедленно скрываем строку
+                $row.hide();
+                updateStatistics();
+
+                // Автоматически обновляем данные через 1 секунду
+                setTimeout(() => {
+                    safeRefresh();
+                }, 1000);
+            }
+        });
+
+        // Обработчик восстановления группы
+        $(document).on('click', '.restore-group-btn', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const groupName = $(this).data('group-name');
+            const groupType = $(this).data('group-type');
+
+            console.log(`👁️ Восстановление группы: ${groupName}, тип: ${groupType}`);
+
+            // Убираем группу из скрытых
+            hiddenGroups[groupType] = hiddenGroups[groupType].filter(name =>
+                name != groupName && String(name) !== String(groupName)
+            );
+
+            saveHiddenGroups();
+            showNotification('success', 'Группа восстановлена', `Группа "${groupName}" возвращена в общий список`);
+
+            // Автоматически обновляем данные через 1 секунду
+            setTimeout(() => {
+                safeRefresh();
+            }, 1000);
+        });
+
+        // Обработчик "Восстановить все"
+        $('#restoreAllHiddenGroups').on('click', function () {
+            if (confirm('Восстановить все скрытые группы?')) {
+                hiddenGroups.ip = [];
+                hiddenGroups.url = [];
+                saveHiddenGroups();
+                $('#hiddenGroupsModal').modal('hide');
+                showNotification('success', 'Все группы восстановлены', 'Все скрытые группы возвращены в общий список');
+
+                // Автоматически обновляем данные через 1 секунду
+                setTimeout(() => {
+                    safeRefresh();
+                }, 1000);
+            }
+        });
+
+        // Обработчик кнопки "Закрыть" в модальном окне скрытых групп
+        $(document).on('click', '#hiddenGroupsModal .btn-secondary[data-bs-dismiss="modal"]', function () {
+            // Безопасное обновление после закрытия модального окна
+            setTimeout(() => {
+                safeRefresh();
+            }, 500);
+        });
+
+        // Обработчик скрытия модального окна скрытых групп
+        $('#hiddenGroupsModal').on('hidden.bs.modal', function () {
+            // Безопасное обновление после закрытия модального окна
+            setTimeout(() => {
+                safeRefresh();
+            }, 500);
+        });
+
+        // Обработчик кнопки "Обновить"
+        // $('#refreshGroupsBtn').on('click', async function () {
+        //     const $btn = $(this);
+        //     const originalHtml = $btn.html();
+
+        //     $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-1"></i>Синхронизация...');
+
+        //     try {
+        //         await syncWithServer();
+        //         Небольшая задержка для визуального подтверждения
+        //         setTimeout(() => {
+        //             location.reload();
+        //         }, 500);
+        //     } catch (error) {
+        //         console.error('❌ Ошибка при обновлении:', error);
+        //         $btn.html(originalHtml).prop('disabled', false);
+        //         showNotification('error', 'Ошибка синхронизации', 'Не удалось обновить данные с сервера');
+
+        //         Даже при ошибке пытаемся обновить интерфейс
+        //         try {
+        //             updateVisibleGroups();
+        //             updateHiddenGroupsUI();
+        //         } catch (uiError) {
+        //             console.error('❌ Ошибка при обновлении UI:', uiError);
+        //         }
+        //     }
+        // });
+
+        // Обработчик кнопки "Обновить"
+        $('#refreshGroupsBtn').on('click', async function () {
+            const $btn = $(this);
+            const originalHtml = $btn.html();
+
+            // Отключаем все кнопки на странице
+            const $allButtons = $('button');
+            $allButtons.prop('disabled', true);
+
+            // Меняем текст только на самой кнопке
+            $btn.html('<i class="fas fa-spinner fa-spin me-1"></i>Синхронизация...');
+
+            try {
+                await syncWithServer();
+
+                setTimeout(() => {
+                    location.reload();
+                }, 500);
+
+            } catch (error) {
+                console.error('❌ Ошибка при обновлении:', error);
+
+                // Восстанавливаем все кнопки
+                $allButtons.prop('disabled', false);
+
+                // Возвращаем прежний текст кнопки
+                $btn.html(originalHtml);
+
+                showNotification('error', 'Ошибка синхронизации', 'Не удалось обновить данные с сервера');
+
+                // Обновляем UI даже при ошибке
+                try {
+                    updateVisibleGroups();
+                    updateHiddenGroupsUI();
+                } catch (uiError) {
+                    console.error('❌ Ошибка при обновлении UI:', uiError);
+                }
+            }
+        });
+
+
+        $('#viewHiddenGroupsBtn').on('click', function () {
+            updateHiddenGroupsModal();
+            $('#hiddenGroupsModal').modal('show');
+        });
+
+        // Обработчики модальных окон скачивания
+        $(document).on('click', '#downloadIpGroupsBtn', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            openModal('#downloadIpGroupsModal', populateDownloadIpGroupsList);
+        });
+
+        $(document).on('click', '#downloadUrlGroupsBtn', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            openModal('#downloadUrlGroupsModal', populateDownloadUrlGroupsList);
+        });
+
+        // Остальные обработчики...
+        $(document).on('click', '#selectAllGroups', function () {
+            $('.group-checkbox').prop('checked', true);
+            updateSelectAllCheckbox();
+        });
+
+        $(document).on('change', '#selectAllCheckbox', function () {
+            $('.group-checkbox').prop('checked', $(this).is(':checked'));
+            updateSelectAllCheckbox();
+        });
+
+        $(document).on('change', '.group-checkbox', updateSelectAllCheckbox);
+        $(document).on('click', '#downloadSelectedGroups', downloadSelectedIpGroups);
+
+        $(document).on('click', '#selectAllUrlGroups', function () {
+            $('.url-group-checkbox').prop('checked', true);
+            updateSelectAllUrlCheckbox();
+        });
+
+        $(document).on('change', '#selectAllUrlCheckbox', function () {
+            $('.url-group-checkbox').prop('checked', $(this).is(':checked'));
+            updateSelectAllUrlCheckbox();
+        });
+
+        $(document).on('change', '.url-group-checkbox', updateSelectAllUrlCheckbox);
+        $(document).on('click', '#downloadSelectedUrlGroups', downloadSelectedUrlGroups);
+
+        // Функция уведомлений
+        function showNotification(type, title, message) {
+            if (!$('#notifications').length) {
+                $('body').append('<div id="notifications" class="position-fixed top-0 end-0 p-3" style="z-index: 9999;"></div>');
+            }
+
+            const icons = {
+                success: 'fa-check-circle',
+                warning: 'fa-exclamation-triangle',
+                error: 'fa-times-circle',
+                info: 'fa-info-circle'
+            };
+
+            const notification = $(`
+                                        <div class="notification ${type}">
+                                            <i class="fas ${icons[type]}"></i>
+                                            <div class="notification-content">
+                                                <div class="notification-title">${title}</div>
+                                                <div class="notification-message">${message}</div>
+                                            </div>
+                                            <button type="button" class="btn-close btn-close-sm"></button>
+                                        </div>
+                                    `);
+
+            $('#notifications').append(notification);
+
+            setTimeout(() => {
+                notification.fadeOut(300, function () {
+                    $(this).remove();
+                });
+            }, 3000);
+
+            notification.find('.btn-close').on('click', function () {
+                notification.fadeOut(300, function () {
+                    $(this).remove();
+                });
+            });
+        }
+    </script>
+}

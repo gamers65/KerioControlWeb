@@ -1,0 +1,142 @@
+﻿[
+  {
+    "Id": "426",
+    "Ip": "127.0.0.1",
+    "Hosts": "updates.kerio.com",
+    "Description": "custom",
+    "Enabled": true
+  },
+  {
+    "Id": "440",
+    "Ip": "127.0.0.1",
+    "Hosts": "kc-mirror.domain.net",
+    "Description": "custom",
+    "Enabled": true
+  },
+  {
+    "Id": "439",
+    "Ip": "127.0.0.1",
+    "Hosts": "manuals.gfi.com",
+    "Description": "custom",
+    "Enabled": true
+  },
+  {
+    "Id": "438",
+    "Ip": "127.0.0.1",
+    "Hosts": "kb.gfi.com",
+    "Description": "custom",
+    "Enabled": true
+  },
+  {
+    "Id": "437",
+    "Ip": "127.0.0.1",
+    "Hosts": "webassist.gfi.com",
+    "Description": "custom",
+    "Enabled": true
+  },
+  {
+    "Id": "436",
+    "Ip": "127.0.0.1",
+    "Hosts": "updates.gfi.com",
+    "Description": "custom",
+    "Enabled": true
+  },
+  {
+    "Id": "435",
+    "Ip": "127.0.0.1",
+    "Hosts": "update.gfi.com",
+    "Description": "custom",
+    "Enabled": true
+  },
+  {
+    "Id": "434",
+    "Ip": "127.0.0.1",
+    "Hosts": "register.gfi.com",
+    "Description": "custom",
+    "Enabled": true
+  },
+  {
+    "Id": "433",
+    "Ip": "127.0.0.1",
+    "Hosts": "mail.gfi.com",
+    "Description": "custom",
+    "Enabled": true
+  },
+  {
+    "Id": "432",
+    "Ip": "127.0.0.1",
+    "Hosts": "assist.gfi.com",
+    "Description": "custom",
+    "Enabled": true
+  },
+  {
+    "Id": "431",
+    "Ip": "127.0.0.1",
+    "Hosts": "appmanager.gfi.com",
+    "Description": "custom",
+    "Enabled": true
+  },
+  {
+    "Id": "430",
+    "Ip": "127.0.0.1",
+    "Hosts": "api.appmanager.gfi.com",
+    "Description": "custom",
+    "Enabled": true
+  },
+  {
+    "Id": "429",
+    "Ip": "127.0.0.1",
+    "Hosts": "manuals.kerio.com",
+    "Description": "custom",
+    "Enabled": true
+  },
+  {
+    "Id": "428",
+    "Ip": "127.0.0.1",
+    "Hosts": "kb.kerio.com",
+    "Description": "custom",
+    "Enabled": true
+  },
+  {
+    "Id": "427",
+    "Ip": "127.0.0.1",
+    "Hosts": "webassist.kerio.com",
+    "Description": "custom",
+    "Enabled": true
+  },
+  {
+    "Id": "425",
+    "Ip": "127.0.0.1",
+    "Hosts": "update.kerio.com",
+    "Description": "custom",
+    "Enabled": true
+  },
+  {
+    "Id": "424",
+    "Ip": "127.0.0.1",
+    "Hosts": "my.kerio.com",
+    "Description": "custom",
+    "Enabled": true
+  },
+  {
+    "Id": "423",
+    "Ip": "127.0.0.1",
+    "Hosts": "mail.kerio.com",
+    "Description": "custom",
+    "Enabled": true
+  },
+  {
+    "Id": "422",
+    "Ip": "127.0.0.1",
+    "Hosts": "hub.kerio.com",
+    "Description": "custom",
+    "Enabled": true
+  },
+  {
+    "Id": "421",
+    "Ip": "127.0.0.1",
+    "Hosts": "assist.kerio.com",
+    "Description": "custom",
+    "Enabled": true
+  }
+]

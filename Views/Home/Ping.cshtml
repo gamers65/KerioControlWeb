@@ -1,0 +1,437 @@
+﻿@{
+    ViewData["Title"] = "Пинг сервера";
+}
+<style>
+    :root {
+        --primary: #4361ee;
+        --success: #06d6a0;
+        --warning: #ff9f1c;
+        --danger: #ef476f;
+        --info: #3bc9db;
+        --dark: #2a2a3b;
+        --light: #f8f9fa;
+        --gray-100: #f1f3f5;
+        --gray-200: #e9ecef;
+        --gray-600: #6c757d;
+        --gray-800: #343a40;
+    }
+    /* PAGE WRAPPER */
+    .container-fluid {
+        animation: fadeIn .4s ease;
+    }
+
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    /* TITLE */
+    h1.display-5 {
+        font-weight: 700;
+        color: var(--primary);
+        text-shadow: 0 2px 4px rgba(67, 97, 238, 0.2);
+    }
+    /* GLASS CARD */
+    .card {
+        border: none !important;
+        border-radius: 1rem !important;
+        background: rgba(255,255,255,0.9) !important;
+        backdrop-filter: blur(12px);
+        box-shadow: 0 15px 40px rgba(67,97,238,0.18);
+        transition: .3s ease;
+    }
+
+        .card:hover {
+            box-shadow: 0 25px 55px rgba(67,97,238,0.28);
+        }
+    /* CARD HEADERS — unified gradient style */
+    .card-header {
+        padding: 1.1rem 1.4rem;
+        border-bottom: none !important;
+        font-weight: 600;
+        color: #fff !important;
+        background: linear-gradient(135deg, var(--primary), #3f37c9) !important;
+    }
+
+        .card-header.bg-dark {
+            background: linear-gradient(135deg, #343a40, #1e1e2f) !important;
+        }
+
+        .card-header.bg-secondary {
+            background: linear-gradient(135deg, #6c757d, #495057) !important;
+        }
+    /* INPUTS */
+    input.form-control,
+    select.form-select {
+        border-radius: 0.75rem !important;
+        padding: 0.9rem 1rem !important;
+        border: 2px solid var(--gray-200) !important;
+        transition: .25s ease;
+        font-size: 1.05rem;
+    }
+
+        input.form-control:focus,
+        select.form-select:focus {
+            border-color: var(--primary) !important;
+            box-shadow: 0 0 0 0.3rem rgba(67, 97, 238, 0.25) !important;
+        }
+    /* BUTTONS — unified with dashboard */
+    .btn {
+        border-radius: 0.85rem !important;
+        font-weight: 700 !important;
+        padding: 0.85rem 1.4rem !important;
+        transition: .25s ease !important;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.15) !important;
+        position: relative;
+        overflow: hidden;
+    }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3));
+            transition: 0.6s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+    .btn-success {
+        background: var(--success) !important;
+        border: none !important;
+        color: #fff !important;
+    }
+
+        .btn-success:hover {
+            transform: translateY(-4px) scale(1.03);
+            box-shadow: 0 10px 25px rgba(6,214,160,0.4) !important;
+        }
+
+    .btn-danger {
+        background: var(--danger) !important;
+        border: none !important;
+    }
+
+        .btn-danger:hover {
+            transform: translateY(-4px) scale(1.03);
+            box-shadow: 0 10px 25px rgba(239,71,111,0.4) !important;
+        }
+
+    .btn-outline-light {
+        border-radius: 0.65rem !important;
+        padding: 0.45rem 1.1rem !important;
+        border: 2px solid rgba(255,255,255,0.6) !important;
+        color: #fff !important;
+        backdrop-filter: blur(4px);
+    }
+
+        .btn-outline-light:hover {
+            background: rgba(255,255,255,0.2) !important;
+        }
+    /* STAT CARDS (ping results) */
+    .card.bg-success,
+    .card.bg-danger,
+    .card.bg-info,
+    .card.bg-gradient {
+        border-radius: 1rem !important;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.15) !important;
+        color: #fff !important;
+    }
+
+    .card.bg-gradient {
+        background: linear-gradient(135deg, var(--primary), #3f37c9) !important;
+    }
+
+    .ping-wrapper {
+        max-width: 1350px; /* или 1200px, 1100px — подбери под себя */
+        margin: 0 auto;
+    }
+    /* LOG PANEL RIGHT */
+    #pingResults {
+        font-family: "JetBrains Mono", monospace;
+        overflow-y: auto;
+        background: #1e1e1e !important;
+        color: #d4d4d4 !important;
+        border-radius: 0 0 1rem 1rem;
+    }
+
+        #pingResults::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        #pingResults::-webkit-scrollbar-thumb {
+            background: #555;
+            border-radius: 10px;
+        }
+    /* ВОССТАНАВЛИВАЕМ ЦВЕТНЫЕ ПЛИТКИ */
+    .stat-tile {
+        border-radius: 1rem !important;
+        color: #fff !important;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.2) !important;
+    }
+        /* Индивидуальные плитки */
+        .stat-tile.bg-success {
+            background: var(--success) !important;
+        }
+
+        .stat-tile.bg-danger {
+            background: var(--danger) !important;
+        }
+
+        .stat-tile.bg-info {
+            background: var(--info) !important;
+        }
+
+        .stat-tile.bg-gradient {
+            background: linear-gradient(135deg, var(--primary), #3f37c9) !important;
+        }
+</style>
+<div class="container-fluid py-5 ping-wrapper">
+    <div class="row">
+        <!-- Левая часть - основной контент -->
+        <div class="col-lg-7">
+            <div class="row justify-content-center">
+                <div class="col-lg-10 col-xxl-12">
+                    @* <div class="text-center mb-5">
+                    <h1 class="display-5 fw-bold text-primary">
+                    <i class="bi bi-activity"></i> Мониторинг пинга сервера
+                    </h1>
+                    <p class="lead text-muted">Проверка доступности и задержки в реальном времени</p>
+                    </div> *@
+                    @* <div class="text-center mb-5">
+                    <h1 class="h3 mb-1 text-primary fw-bold">
+                    <i class="bi bi-activity"></i> Мониторинг пинга сервера
+                    </h1>
+                    <p class="text-muted mb-0">Проверка доступности и задержки в реальном времени</p>
+                    </div> *@
+                    <!-- Управление -->
+                    <div class="card shadow-lg border-0 mb-4">
+                        <div class="card-body p-4">
+                            <div class="row align-items-end g-3">
+                                <div class="col-md-6">
+                                    <label for="pingAddress" class="form-label fw-semibold">
+                                        <i class="bi bi-cpu"></i> IP-адрес или домен
+                                    </label>
+                                    <input type="text" id="pingAddress" class="form-control form-control-lg"
+                                           value="192.168.50.1" placeholder="Например: 8.8.8.8" />
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label fw-semibold">Интервал</label>
+                                    <select id="pingIntervalSelect" class="form-select">
+                                        <option value="500">0.5 сек</option>
+                                        <option value="1000" selected>1 сек</option>
+                                        <option value="2000">2 сек</option>
+                                        <option value="5000">5 сек</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <button id="startPing" class="btn btn-success btn-lg w-100 mb-2">
+                                        <i class="bi bi-play-fill"></i> Старт
+                                    </button>
+                                    <button id="stopPing" class="btn btn-danger btn-lg w-100" disabled>
+                                        <i class="bi bi-stop-fill"></i> Стоп
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Статистика -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-sm-6 col-lg-3">
+                            <div class="card stat-tile bg-gradient text-white border-0 shadow-sm">
+                                <div class="card-body text-center">
+                                    <h5><i class="bi bi-clock-history"></i> Задержка</h5>
+                                    <h3 id="currentPing">-- ms</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-lg-3">
+                            <div class="card stat-tile bg-success text-white border-0 shadow-sm">
+                                <div class="card-body text-center">
+                                    <h5>Успешно</h5>
+                                    <h3 id="successCount">0</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-lg-3">
+                            <div class="card stat-tile bg-danger text-white border-0 shadow-sm">
+                                <div class="card-body text-center">
+                                    <h5>Потеряно</h5>
+                                    <h3 id="lossCount">0</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-lg-3">
+                            <div class="card stat-tile bg-info text-white border-0 shadow-sm">
+                                <div class="card-body text-center">
+                                    <h5>Среднее</h5>
+                                    <h3 id="avgPing">-- ms</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- График -->
+                    <div class="card shadow-sm border-0 mb-4">
+                        <div class="card-header bg-dark text-white">
+                            <h5 class="mb-0">График задержки (последние 60 пингов)</h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="pingChart" height="120"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Правая часть - лог -->
+        <div class="col-lg-5">
+            <div class="card shadow-sm border-0">
+                <div class="card-header d-flex justify-content-between align-items-center bg-secondary text-white">
+                    <h5 class="mb-0">Журнал пингов</h5>
+                    <button id="clearLog" class="btn btn-sm btn-outline-light">Очистить</button>
+                </div>
+                <div class="card-body p-0 bg-dark">
+                    <div id="pingResults" class="text-light p-3"
+                         style="font-family: Consolas, monospace; overflow-y: auto; font-size: 0.95rem;">
+                        <div class="text-light opacity-75 text-center py-5">Нажмите «Старт» для начала мониторинга...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        let pingInterval = null;
+        const pings = [];
+        const maxPoints = 60;
+        const resultsDiv = $('#pingResults');
+        const chart = new Chart(document.getElementById('pingChart'), {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Задержка',
+                    data: [],
+                    borderColor: '#0d6efd',
+                    backgroundColor: 'rgba(13, 110, 253, 0.1)',
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 3
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, suggestedMax: 100 },
+                    x: { display: false }
+                }
+            }
+        });
+        function scrollToBottom() {
+            resultsDiv.animate({ scrollTop: resultsDiv[0].scrollHeight }, 200);
+        }
+        async function doPing() {
+            const address = $('#pingAddress').val().trim();
+            if (!address) return;
+            const ts = new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            try {
+                const resp = await fetch(`/Home/PingServer?address=${encodeURIComponent(address)}`);
+                const text = await resp.text();
+                const match = text.match(/время[=](\d+)мс\s+TTL[=](\d+)/);
+                if (match) {
+                    const ms = parseInt(match[1]);
+                    const display = ms === 0 ? '<1' : ms;
+                    resultsDiv.append(
+                        `<div class="text-success"><i class="bi bi-check-circle-fill"></i> [${ts}] Ответ от ${address}: время=<strong>${display}мс</strong> TTL=${match[2]}</div>`
+                    );
+                    // Статистика
+                    $('#successCount').text(parseInt($('#successCount').text()) + 1);
+                    $('#currentPing').html(display === '<1' ? '<1 ms' : display + ' ms')
+                        .css('color', ms < 30 ? '#28a745' : ms < 100 ? '#ffc107' : '#dc3545');
+                    // График
+                    pings.push(ms === 0 ? 0.5 : ms);
+                    if (pings.length > maxPoints) pings.shift();
+                    chart.data.labels = pings.map((_, i) => i + 1);
+                    chart.data.datasets[0].data = pings.slice();
+                    chart.update('quiet');
+                    // Среднее
+                    const avg = Math.round(pings.reduce((a, b) => a + b, 0) / pings.length);
+                    $('#avgPing').text(avg + ' ms');
+                } else {
+                    resultsDiv.append(`<div class="text-danger"><i class="bi bi-x-circle-fill"></i> [${ts}] ${text.trim()}</div>`);
+                    $('#lossCount').text(parseInt($('#lossCount').text()) + 1);
+                    $('#currentPing').html('—').css('color', '#dc3545');
+                }
+            } catch {
+                resultsDiv.append(`<div class="text-danger"><i class="bi bi-exclamation-triangle-fill"></i> [${ts}] Ошибка соединения</div>`);
+                $('#lossCount').text(parseInt($('#lossCount').text()) + 1);
+                $('#currentPing').html('—').css('color', '#dc3545');
+            }
+            scrollToBottom();
+        }
+        $('#startPing').click(function () {
+            if (pingInterval) return;
+            const interval = $('#pingIntervalSelect').val();
+            pingInterval = setInterval(doPing, interval);
+            $(this).prop('disabled', true);
+            $('#stopPing').prop('disabled', false);
+            resultsDiv.html('<div class="text-info">Запуск пинга...</div>');
+            doPing();
+        });
+        $('#stopPing').click(function () {
+            clearInterval(pingInterval);
+            pingInterval = null;
+            $('#startPing').prop('disabled', false);
+            $(this).prop('disabled', true);
+        });
+        $('#clearLog').click(function () {
+            resultsDiv.html('<div class="text-muted text-center py-5">Лог очищен. Нажмите «Старт».</div>');
+            pings.length = 0;
+            chart.data.labels = [];
+            chart.data.datasets[0].data = [];
+            chart.update();
+            $('#successCount, #lossCount').text('0');
+            $('#currentPing').html('-- ms');
+            $('#avgPing').html('-- ms');
+        });
+
+        function matchHeights() {
+            const leftCol = document.querySelector('.col-lg-7');
+            const rightHeader = document.querySelector('.card-header.bg-secondary');
+            if (leftCol && rightHeader) {
+                const leftHeight = leftCol.offsetHeight;
+                const headerHeight = rightHeader.offsetHeight;
+                document.getElementById('pingResults').style.height = (leftHeight - headerHeight) + 'px';
+            }
+        }
+
+        $(document).ready(function () {
+            matchHeights();
+            window.addEventListener('resize', matchHeights);
+        });
+
+    </script>
+    <style>
+        .bg-gradient {
+            background: linear-gradient(135deg, #667eea, #764ba2) !important;
+        }
+
+        #pingResults div {
+            padding: 3px 0;
+        }
+    </style>
+}

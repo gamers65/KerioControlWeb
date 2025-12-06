@@ -1,0 +1,14 @@
+﻿using Microsoft.AspNetCore.Mvc;
+@using KerioControlWeb
+@using KerioControlWeb.Models
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+namespace KerioControlWeb.Views
+{
+    public class _ViewImports : Controller
+    {
+        public IActionResult Index()
+        {
+            return View();
+        }
+    }
+}

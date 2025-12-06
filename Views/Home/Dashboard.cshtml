@@ -1,0 +1,1364 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@model KerioControlWeb.Models.DashboardModel
+@{
+    var isAuthenticated = HttpContextAccessor.HttpContext?.Session.GetString("IsAuthenticated") == "true";
+    if (!isAuthenticated)
+    {
+        HttpContextAccessor.HttpContext.Response.Redirect(Url.Action("Index", "Home"));
+        return;
+    }
+    ViewData["Title"] = "Панель управления";
+}
+<style>
+    :root {
+        --primary: #4361ee;
+        --success: #06d6a0;
+        --warning: #ff9f1c;
+        --danger: #ef476f;
+        --dark: #2a2a3b;
+        --light: #f8f9fa;
+        --gray-100: #f1f3f5;
+        --gray-200: #e9ecef;
+        --gray-600: #6c757d;
+        --gray-800: #343a40;
+    }
+    body {
+        background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+        min-height: 100vh;
+    }
+    .card {
+        border: none;
+        border-radius: 1rem;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+    .card:hover {
+        /* transform: translateY(-8px); */
+        box-shadow: 0 20px 40px rgba(67, 97, 238, 0.25) !important;
+    }
+    .card-header {
+        background: linear-gradient(135deg, var(--primary), #3f37c9) !important;
+        border-bottom: 0;
+        padding: 1.5rem;
+    }
+    .card-header.bg-success {
+        background: linear-gradient(135deg, var(--success), #06b68a) !important;
+    }
+    /* === ОСНОВНЫЕ КНОПКИ — стали ярче и заметнее === */
+    .btn {
+        border-radius: 0.85rem;
+        font-weight: 700;
+        padding: 0.85rem 1.8rem;
+        transition: all 0.25s ease;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        position: relative;
+        overflow: hidden;
+    }
+    .btn-primary {
+        background: var(--primary);
+        border: none;
+        color: white;
+    }
+    .btn-primary:hover {
+        background: #3a56e0;
+        transform: translateY(-4px) scale(1.03);
+        box-shadow: 0 10px 25px rgba(67, 97, 238, 0.4);
+    }
+    .btn-success {
+        background: #198754;
+        border: none;
+        color: white;
+    }
+    .btn-success:hover {
+        background: #05c291;
+        transform: translateY(-4px) scale(1.03);
+        box-shadow: 0 10px 25px rgba(6, 214, 160, 0.4);
+    }
+    /* Лёгкий "блеск" при наведении */
+    .btn::before {
+        content: '';
+        position: absolute;
+        top: 0; left: -100%;
+        width: 50%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3));
+        transition: 0.6s;
+    }
+    .btn:hover::before {
+        left: 100%;
+    }
+    .form-control, .form-select {
+        border-radius: 0.75rem;
+        padding: 0.9rem 1rem;
+        border: 2px solid var(--gray-200);
+        transition: all 0.3s ease;
+    }
+    .form-control:focus, .form-select:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 0.3rem rgba(67, 97, 238, 0.25);
+    }
+    .glass-card {
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(12px);
+        /* border: 1px solid rgba(255, 255, 255, 0.4); */
+    }
+    /* Пульсация и плавающие элементы */
+    .pulse { animation: pulse 2s infinite; }
+        @* Экранируем весь блок keyframes *@
+        <text>
+        @@keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(67, 97, 238, 0.5); }
+            70% { box-shadow: 0 0 0 14px rgba(67, 97, 238, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(67, 97, 238, 0); }
+        }
+        @@keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        </text>
+    code {
+        background: var(--gray-100);
+        padding: 0.2rem 0.5rem;
+        border-radius: 0.5rem;
+        font-size: 0.9em;
+    }
+    #fileInfo {
+        background: rgba(67, 97, 238, 0.12);
+        border-left: 5px solid var(--primary);
+        border-radius: 0.75rem;
+        padding: 1rem 1.2rem;
+        margin-top: 1rem;
+        font-weight: 500;
+    }
+    /* === КНОПКИ ИСКЛЮЧЕНИЯ / ВКЛЮЧЕНИЯ — теперь ОЧЕНЬ заметные === */
+    .exclude-btn,
+    .include-btn {
+        width: 36px !important;
+        height: 36px !important;
+        padding: 0 !important;
+        font-size: 1rem !important;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50% !important;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 3px solid transparent;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        position: relative;
+        z-index: 1;
+    }
+    .exclude-btn {
+        background: #ef476f;
+        color: white;
+        border: 3px solid #d63d63;
+    }
+    .include-btn {
+        background: #06d6a0;
+        color: white;
+        border: 3px solid #05c291;
+    }
+    .remove-exclude-btn {
+    width: 26px !important;
+    height: 26px !important;
+    padding: 0 !important;
+    border-radius: 50% !important;
+
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 0.75rem !important;
+
+    border: 2px solid #d63d63 !important;
+    background: #ef476f !important;
+    color: #fff !important;
+
+    box-shadow: 0 2px 8px rgba(239, 71, 111, 0.35) !important;
+    transition: 0.25s ease;
+
+    /* отключаем глобальные кнопочные стили */
+    --bs-btn-padding-y: 0;
+    --bs-btn-padding-x: 0;
+    }
+    .remove-exclude-btn i {
+        font-size: 0.85rem !important;
+    }
+
+    .remove-exclude-btn:hover {
+        background: #ff1f58 !important;
+        transform: scale(1.15) translateY(-2px);
+        box-shadow: 0 0 12px rgba(239, 71, 111, 0.6);
+    }
+
+    /* Hover — ещё ярче + увеличение + свечение */
+    .exclude-btn:hover {
+        background: #ff1f58 !important;
+        transform: scale(1.25) translateY(-3px);
+        box-shadow: 0 0 20px rgba(239, 71, 111, 0.7), 0 8px 20px rgba(0,0,0,0.3);
+    }
+    .include-btn:hover {
+        background: #00ff9d !important;
+        transform: scale(1.25) translateY(-3px);
+        box-shadow: 0 0 20px rgba(6, 214, 160, 0.7), 0 8px 20px rgba(0,0,0,0.3);
+    }
+    .file-upload-wrapper {
+        position: relative;
+        display: inline-block;
+    }
+    .file-upload-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--primary);
+        color: white !important;
+        padding: 0.85rem 1.8rem;
+        border-radius: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.25s ease;
+        box-shadow: 0 4px 15px rgba(67,97,238,0.25);
+        user-select: none;
+    }
+    .file-upload-btn:hover {
+        background: #3a56e0;
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(67,97,238,0.35);
+    }
+    /* Когда файл выбран — меняем текст и цвет */
+    .file-input:focus + .file-upload-btn,
+    .file-upload-btn.selected {
+        background: var(--success);
+    }
+    .file-upload-btn.selected:hover {
+        background: #05c291;
+    }
+    #file-name {
+        font-weight: normal;
+        font-size: 0.95em;
+    }
+    #excludeList .list-group-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        /* Зафиксировать строку и не давать ей "разъезжаться" */
+        padding: 6px 10px;
+
+        /* Чтобы длинные домены переносились */
+        word-break: break-all;
+        white-space: normal;
+    }
+
+    #excludeList .list-group-item code {
+        flex: 1;                  /* тянется на всю ширину */
+        word-break: break-all;    /* перенос длинных URL */
+        white-space: normal;      /* разрешить перенос */
+    }
+
+    #excludeList .remove-exclude-btn {
+        flex-shrink: 0;           /* НЕ сжимать кнопку */
+        margin-left: 10px;
+    }
+    /* === УНИФИЦИРОВАННЫЕ УВЕДОМЛЕНИЯ === */
+    .result-box {
+        width: 100%;
+        padding: 1rem 1.4rem;
+        border-radius: 0.75rem;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        animation: fadeIn 0.25s ease;
+        gap: 8px;
+    }
+
+    .result-box.success {
+        background: rgba(6,214,160,0.12);
+        border-left: 5px solid var(--success);
+        color: #1d7a45;
+    }
+
+    .result-box.error {
+        background: rgba(239,71,111,0.12);
+        border-left: 5px solid var(--danger);
+        color: var(--danger);
+    }
+
+    .result-box.warning {
+        background: rgba(255,159,28,0.12);
+        border-left: 5px solid var(--warning);
+        color: var(--warning);
+    }
+
+    .result-box i {
+        font-size: 1.2rem;
+    }
+    /* Загрузка / ожидание */
+    .result-box.loading {
+        background: rgba(67, 97, 238, 0.12);
+        border-left: 5px solid var(--primary);
+        color: var(--primary);
+    }
+
+    @@keyframes fadeIn {
+        from { opacity: 0; transform: translateY(6px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+    /* === СТИЛИ ДЛЯ УВЕДОМЛЕНИЙ === */
+    .notification {
+        min-width: 300px;
+        background: white;
+        border-radius: 0.75rem;
+        padding: 1rem 1.25rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        border-left: 5px solid;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        animation: slideInRight 0.3s ease, fadeOut 0.3s ease 2.7s forwards;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .notification::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 3px;
+        background: currentColor;
+        opacity: 0.3;
+    }
+
+    .notification.success {
+        border-left-color: var(--success);
+        color: #1d7a45;
+    }
+
+    .notification.warning {
+        border-left-color: var(--warning);
+        color: #b56c0e;
+    }
+
+    .notification.error {
+        border-left-color: var(--danger);
+        color: #c53030;
+    }
+
+    .notification.info {
+        border-left-color: var(--primary);
+        color: #2c5aa0;
+    }
+
+    .notification i {
+        font-size: 1.4rem;
+        flex-shrink: 0;
+    }
+
+    .notification-content {
+        flex-grow: 1;
+    }
+
+    .notification-title {
+        font-weight: 700;
+        font-size: 0.95rem;
+        margin-bottom: 2px;
+    }
+
+    .notification-message {
+        font-size: 0.85rem;
+        opacity: 0.9;
+    }
+
+    @@keyframes slideInRight {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+
+    @@keyframes fadeOut {
+        from {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        to {
+            opacity: 0;
+            transform: translateX(100%);
+        }
+    }
+    .normal-size-btn {
+        padding: 0.3rem 1rem !important;
+        font-size: 0.9rem !important;
+        border-radius: 0.5rem !important;
+    }
+
+    .table-action-btn {
+        padding: 0.3rem 0.5rem !important;
+        font-size: 0.8rem !important;
+        width: 32px !important;
+        height: 32px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+    .clickable-address {
+        transition: all 0.2s ease;
+        padding: 2px 4px;
+        border-radius: 4px;
+    }
+
+    .clickable-address:hover {
+        background-color: rgba(67, 97, 238, 0.1) !important;
+    }
+</style>
+<div class="container py-7">
+    <!-- Заголовок -->
+@*     <div class="text-center mb-7">
+        <h1 class="display-7 fw-bold text-primary mb-7">
+            <i class="fas fa-shield-alt me-3 pulse"></i>Kerio Control Panel
+        </h1>
+        <p class="lead text-muted">Загрузка документов • Извлечение данных • Управление группами фильтрации</p>
+    </div> *@
+    <div class="row g-5">
+        <!-- Левая карточка: Загрузка и обработка -->
+        <div class="col-lg-6">
+            <div class="card shadow-lg h-100 glass-card">
+                <div class="card-header bg-gradient text-white text-center">
+                    <h4 class="mb-0 d-flex align-items-center justify-content-center gap-3">
+                        <i class="fas fa-cloud-upload-alt fa-lg"></i>
+                        Загрузка и обработка файлов
+                    </h4>
+                </div>
+                <div class="card-body p-4">
+                    <form id="uploadForm" enctype="multipart/form-data">
+                        @Html.AntiForgeryToken()
+                        <div class="mb-4">
+                            <label class="form-label fw-bold text-dark">Выберите документ</label>
+                            <input type="file" name="File" class="form-control form-control-lg shadow-sm" accept=".pdf,.docx,.txt,.csv" required />
+                            <!-- Замени этот блок в левой карточке (вместо старого #fileInfo) -->
+                            <div id="fileInfo" class="d-none mt-3">
+                                <div class="d-flex align-items-center justify-content-between gap-3">
+                                    <div class="d-flex align-items-center gap-3 flex-grow-1">
+                                        <!-- Иконка файла -->
+                                        <i class="fas fa-file-alt text-primary fs-4"></i>
+                                        <!-- Название + размер в одну строку, без лишних span -->
+                                        <div class="text-truncate" style="max-width: 380px;">
+                                            <span class="fw-semibold text-dark" id="fileName">9-173.pdf</span>
+                                            <span class="text-muted small ms-2">•</span>
+                                            <span class="text-muted small" id="fileSize">272.1 KB</span>
+                                        </div>
+                                    </div>
+                                    <!-- Кнопка удаления — маленькая, аккуратная -->
+                                    <button type="button"
+                                            class="btn btn-sm btn-outline-secondary rounded-circle p-0 d-flex align-items-center justify-content-center"
+                                            style="width: 32px; height: 32px;"
+                                            onclick="$('input[name=\'File\']').val(''); $('#fileInfo').addClass('d-none'); $('#uploadBtn').prop('disabled', true);"
+                                            title="Убрать файл">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <small class="text-muted">Поддерживаются: PDF, Word, TXT, CSV (до 20 МБ)</small>
+                        </div>
+                        <button type="button" id="uploadBtn" class="btn btn-primary btn-lg w-100 shadow-sm" disabled>
+                            <i class="fas fa-magic me-2"></i>Загрузить и извлечь данные
+                        </button>
+                        <!-- Результаты обработки -->
+                        <div id="uploadResultsWrapper" class="mt-4">
+                            <div id="extractedData" class="mt-4" style="display:none;">
+                                <div class="d-flex align-items-center justify-content-between mb-3">
+                                    <h5 class="fw-bold text-success mb-0">
+                                        <i class="fas fa-check-double me-2"></i>Извлечено: <span id="extractedCount" class="badge bg-success badge-floating fs-6">0</span>
+                                    </h5>
+                                </div>
+                                <div id="dataList" class="border rounded-3 p-4 bg-light mb-4" style="max-height: 420px; overflow-y: auto; font-family: 'JetBrains Mono', 'Courier New', monospace; background: #f8f9fa;">
+                                    <!-- Элементы будут здесь -->
+                                </div>
+                                <!-- Новый блок исключений: в стиле карточки, с темой danger, список как list-group, более структурированный и чистый -->
+                                <div class="card mt-3 shadow-sm">
+                                    <div class="card-header bg-danger text-white py-2">
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <i class="fas fa-ban"></i>
+                                                <span class="fw-bold">Исключения (единоразовые)</span>
+                                                <span id="excludeCount" class="badge bg-white text-danger rounded-pill">0</span>
+                                            </div>
+                                            <div class="d-flex gap-1">
+                                                <!-- Кнопка просмотра глобальных исключений -->
+                                                <button type="button" class="btn btn-info btn-sm rounded-circle p-0 d-flex align-items-center justify-content-center"
+                                                        style="width: 28px; height: 28px;"
+                                                        id="viewGlobalExcludesBtn"
+                                                        title="Просмотр глобальных исключений">
+                                                    <i class="fas fa-eye fs-6"></i>
+                                                </button>
+                                                <!-- Существующая кнопка очистки -->
+                                                <button type="button" class="btn btn-danger btn-sm rounded-circle p-0 d-flex align-items-center justify-content-center"
+                                                        style="width: 28px; height: 28px; display: none;" 
+                                                        id="clearExcludesBtn"
+                                                        title="Удалить всё">
+                                                    <i class="fas fa-trash-alt fs-6"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <ul id="excludeList" class="list-group list-group-flush" style="max-height: 200px; overflow-y: auto;">
+                                        <!-- Элементы будут здесь -->
+                                    </ul>
+                                    <div class="card-footer bg-light py-2">
+                                        <div class="input-group">
+                                            <input type="text" id="manualExclude" class="form-control border-danger-subtle"
+                                                   placeholder="Добавить в глобальные исключения вручную…">
+                                            <button class="btn btn-danger" type="button" id="addExcludeBtn">
+                                                <i class="fas fa-plus"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button type="button" class="btn btn-primary btn-lg w-100 mt-4 shadow" id="copyToGroupBtn">
+                                    <i class="fas fa-copy me-2"></i>Скопировать в поле группы
+                                </button>
+                                <div id="results" class="mt-4"></div>
+                                @* <div id="results" class="mt-4 result-box"></div> *@
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <!-- Правая карточка: Создание группы -->
+        <div class="col-lg-6">
+            <div class="card shadow-lg h-100 glass-card">
+                <div class="card-header bg-success text-white text-center">
+                    <h4 class="mb-0 d-flex align-items-center justify-content-center gap-3">
+                        <i class="fas fa-layer-group fa-lg"></i>
+                        Работа с группами адресов
+                    </h4>
+                </div>
+                <div class="card-body p-4">
+                    <form id="groupForm">
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Тип группы</label>
+                            <select name="IsUrlGroup" class="form-select form-select-lg shadow-sm">
+                                <option value="false">IP-группа (адреса и домены)</option>
+                                <option value="true">URL-группа</option>
+                            </select>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Доступные группы</label>
+                            <select id="existingGroupSelect" class="form-select form-select-lg shadow-sm mb-3">
+                                <option value="">Выберите существующую группу...</option>
+                            </select>
+                            <!-- Добавляем этот блок -->
+                            <div id="groupItemCount" class="mb-3" style="display: none;">
+                                <small class="text-muted">Количество адресов в выбранной группе: <span id="selectedGroupCount" class="fw-bold text-primary">0</span></small>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="createNewGroupCheck" style="transform: scale(1.3);">
+                                <label class="form-check-label fw-bold text-primary" for="createNewGroupCheck">
+                                    Создать новую группу
+                                </label>
+                            </div>
+                            <div id="newGroupNameWrapper" class="mt-3" style="display: none;">
+                                <input type="text" id="newGroupName" class="form-control form-control-lg shadow-sm" placeholder="Например: Соцсети 2025, Банки, Офисные ПК..." maxlength="100" />
+                                <small class="text-muted">Отобразится в интерфейсе Kerio Control</small>
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Описание (необязательно)</label>
+                            <input name="Description" class="form-control form-control-lg shadow-sm" placeholder="Например: Блокировка соцсетей в рабочее время" />
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Элементы группы</label>
+                            <textarea name="Items" id="itemsTextarea" class="form-control form-control-lg shadow-sm" rows="9"
+                                      placeholder="192.168.1.100&#10;10.0.0.0/8&#10;vk.com&#10;instagram.com&#10;youtube.com"
+                                      style="font-family: 'JetBrains Mono', monospace; resize: vertical;"></textarea>
+                            <div class="d-flex justify-content-between align-items-center mt-2">
+                                <small class="text-muted">По одному IP, подсети или домену на строку</small>
+                                <span id="itemsCounter" class="fw-bold fs-5">
+                                    <span id="count" class="text-success">0</span> / <span class="text-danger">900</span>
+                                </span>
+                            </div>
+                        </div>
+                        <button type="button" id="createGroupBtn" class="btn btn-success btn-lg w-100 shadow" disabled>
+                            <i class="fas fa-plus-circle me-2"></i>Создать / обновить группу
+                        </button>
+                        <div id="groupResults" class="mt-4 d-none"></div>
+                        @* <div id="groupResults" class="mt-4 d-none result-box"></div> *@
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Контейнер для уведомлений -->
+<div id="notifications" class="position-fixed top-0 end-0 p-3" style="z-index: 9999;"></div>
+<!-- Модальное окно для просмотра глобальных исключений -->
+<div class="modal fade" id="globalExcludesModal" tabindex="-1" aria-labelledby="globalExcludesModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="globalExcludesModalLabel">
+                    <i class="fas fa-ban me-2"></i>Глобальные исключения
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Статистика -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="card bg-light">
+                            <div class="card-body py-3">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-list text-danger fs-4 me-3"></i>
+                                    <div>
+                                        <h4 class="mb-0 fw-bold" id="globalExcludesCount">0</h4>
+                                        <small class="text-muted">Всего исключений</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card bg-light">
+                            <div class="card-body py-3">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-database text-primary fs-4 me-3"></i>
+                                    <div>
+                                        <h4 class="mb-0 fw-bold" id="globalExcludesFileInfo">-</h4>
+                                        <small class="text-muted">Файл исключений</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Поиск и управление -->
+                <div class="row mb-3">
+                    <div class="col-md-8">
+                        <div class="input-group">
+                            <span class="input-group-text bg-light">
+                                <i class="fas fa-search text-muted"></i>
+                            </span>
+                            <input type="text" id="searchExcludes" class="form-control" placeholder="Поиск в исключениях...">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-primary normal-size-btn" id="refreshExcludesBtn">
+                                <i class="fas fa-sync-alt me-1"></i>Обновить
+                            </button>
+                            <button type="button" class="btn btn-danger normal-size-btn" id="clearAllExcludesBtn">
+                                <i class="fas fa-trash me-1"></i>Очистить
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Список исключений -->
+                <div class="border rounded-3" style="max-height: 400px; overflow-y: auto;">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light sticky-top">
+                            <tr>
+                                <th width="50">#</th>
+                                <th>Адрес/Домен</th>
+                                <th width="100" class="text-center">Действия</th>
+                            </tr>
+                        </thead>
+                        <tbody id="globalExcludesList">
+                            <!-- Список будет загружаться здесь -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Состояние пустого списка -->
+                <div id="emptyExcludesMessage" class="text-center py-5 d-none">
+                    <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">Список исключений пуст</h5>
+                    <p class="text-muted">Добавьте адреса в глобальные исключения</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i>Закрыть
+                </button>
+                <button type="button" class="btn btn-primary" onclick="$('#manualExclude').focus();" data-bs-dismiss="modal">
+                    <i class="fas fa-plus me-1"></i>Добавить новое
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <script>
+        // === ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ===
+        let extractedItems = [];
+        let excludedItems = new Set();
+        const MAX_ITEMS = 900;
+        const $dataList = $('#dataList');
+        const $excludeList = $('#excludeList');
+        const $extractedCount = $('#extractedCount');
+        const $excludeCount = $('#excludeCount');
+        const $textarea = $('#itemsTextarea');
+        const $counter = $('#count');
+        const $counterWrapper = $('#itemsCounter');
+        $('input[name="File"]').on('change', function () {
+            const file = this.files[0];
+            if (file) {
+                $('#uploadBtn').prop('disabled', false);
+                const sizeKB = (file.size / 1024).toFixed(1);
+                const sizeMB = (file.size / 1024 / 1024).toFixed(2);
+                const humanSize = sizeMB >= 1 ? sizeMB + " MB" : sizeKB + " KB";
+                $('#fileName').text(file.name);
+                $('#fileSize').text(humanSize);
+                $("#fileInfo").removeClass("d-none");
+            } else {
+                $('#uploadBtn').prop('disabled', true);
+                $("#fileInfo").addClass("d-none");
+                $('#fileName').text("");
+                $('#fileSize').text("");
+            }
+        });
+
+        function renderExtractedList() {
+            $dataList.empty();
+            extractedItems.forEach((item, index) => {
+                const escaped = item.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                const isExcluded = excludedItems.has(item);
+                const row = $(`
+                    <div class="d-flex align-items-center justify-content-between py-1 ${isExcluded ? 'text-muted opacity-50' : ''}">
+                        <div class="d-flex align-items-center flex-grow-1 clickable-address" style="cursor: pointer;" data-address="${item.replace(/"/g, '&quot;')}" title="Копировать в поле ввода">
+                            <i class="fas fa-angle-right me-2"></i>
+                            <code class="text-break">${escaped}</code>
+                        </div>
+                        <div>
+                            ${!isExcluded
+                                ? `<button class="btn btn-sm btn-outline-danger exclude-btn" data-index="${index}" title="Исключить"><i class="fas fa-minus"></i></button>`
+                                : `<button class="btn btn-sm btn-outline-success include-btn" data-index="${index}" title="Вернуть"><i class="fas fa-plus"></i></button>`
+                            }
+                        </div>
+                    </div>
+                `);
+                $dataList.append(row);
+            });
+            $extractedCount.text(extractedItems.length);
+            updateCopyButtonText();
+        }
+
+        // Обработчик клика по всему блоку адреса
+        $(document).on('click', '.clickable-address', function() {
+            const address = $(this).data('address');
+            $('#manualExclude').val(address);
+    
+            showNotification('info', 'Скопировано', `Адрес "${address}" скопирован в поле ввода`);
+            $('#manualExclude').focus();
+    
+            // Анимация выделения
+            $(this).addClass('bg-light rounded px-2');
+            setTimeout(() => {
+                $(this).removeClass('bg-light rounded px-2');
+            }, 1000);
+        });
+
+        // Восстанавливаем обработчик очистки всех локальных исключений
+        $('#clearExcludesBtn').on('click', function() {
+            if (excludedItems.size > 0) {
+                if (confirm(`Очистить все локальные исключения (${excludedItems.size} элементов)?`)) {
+                    excludedItems.clear();
+                    renderExcludeList();
+                    renderExtractedList();
+                    showNotification('info', 'Очищено', 'Все локальные исключения удалены');
+                }
+            } else {
+                showNotification('warning', 'Пусто', 'Нет локальных исключений для очистки');
+            }
+        });
+
+        function renderExcludeList() {
+            $excludeList.empty();
+            excludedItems.forEach(item => {
+                const escaped = item.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                const li = $(`
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <code>${escaped}</code>
+                        <button type="button" class="remove-exclude-btn" data-item="${item.replace(/"/g, '&quot;')}">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </li>
+                `);
+                $excludeList.append(li);
+            });
+            $excludeCount.text(excludedItems.size);
+            $('#clearExcludesBtn').toggle(excludedItems.size > 0);
+        }
+
+        function updateCopyButtonText() {
+            const count = extractedItems.filter(i => !excludedItems.has(i)).length;
+            $('#copyToGroupBtn').html(`
+                    Скопировать в поле группы
+                    <span class="badge bg-light text-dark ms-2">${count}</span>
+                    ${count < extractedItems.length ? `<small class="text-muted ms-2">(исключено ${extractedItems.length - count})</small>` : ''}
+                `);
+        }
+        // Восстанавливаем обработчики для кнопок в основном списке
+        $(document).on('click', '.exclude-btn', function () {
+            const index = $(this).data('index');
+            const item = extractedItems[index];
+            excludedItems.add(item);
+            renderExtractedList();
+            renderExcludeList();
+            showNotification('success', 'Добавлено', `"${item}" добавлен в локальные исключения`);
+        });
+        $(document).on('click', '.include-btn', function () {
+            const index = $(this).data('index');
+            const item = extractedItems[index];
+            excludedItems.delete(item);
+            renderExtractedList();
+            renderExcludeList();
+            showNotification('info', 'Возвращено', `"${item}" возвращен в основной список`);
+        });
+        // Восстанавливаем обработчик удаления одного элемента
+        $(document).on('click', '.remove-exclude-btn', function () {
+            const item = $(this).data('item');
+            excludedItems.delete(item);
+            renderExtractedList();
+            renderExcludeList();
+            showNotification('info', 'Удалено', `"${item}" удален из локальных исключений`);
+        });
+        // Обновляем обработчик добавления исключений - БЕЗ локального добавления
+        $('#addExcludeBtn').on('click', async () => {
+            const val = $('#manualExclude').val().trim();
+            if (val) {
+                // Проверяем, нет ли уже такого исключения на клиенте
+                if (excludedItems.has(val)) {
+                    showNotification('warning', 'Уже в исключениях', 
+                        `"${val}" уже есть в списке исключений`);
+                    $('#manualExclude').val('').focus();
+                    return;
+                }
+        
+                // Проверяем валидность
+                if (val.length < 2) {
+                    showNotification('error', 'Ошибка', 
+                        'Слишком короткое значение для исключения');
+                    return;
+                }
+        
+                try {
+                    // Отправляем на сервер
+                    const response = await fetch('/Home/AddExclude', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(val)
+                    });
+            
+                    if (response.ok) {
+                        const result = await response.json();
+                        if (result.success) {
+                            // НЕ добавляем локально - только уведомление
+                            showNotification('success', 'Успешно добавлено', 
+                                `"${val}" добавлен в глобальные исключения и сохранен в файл`);
+                    
+                            // Очищаем поле ввода
+                            $('#manualExclude').val('').focus();
+                        } else {
+                            showNotification('error', 'Ошибка сервера', 
+                                result.message || 'Не удалось сохранить исключение');
+                        }
+                    } else {
+                        showNotification('error', 'Ошибка сервера', 
+                            'Не удалось отправить исключение на сервер');
+                    }
+                } catch (error) {
+                    console.error('Ошибка:', error);
+                    showNotification('error', 'Ошибка сети', 
+                        'Не удалось отправить исключение на сервер');
+                }
+            } else {
+                showNotification('warning', 'Пустое поле', 
+                    'Введите адрес для добавления в исключения');
+            }
+        });
+        $('#manualExclude').on('keypress', e => {
+            if (e.which === 13) $('#addExcludeBtn').click();
+        });
+        // === ЗАГРУЗКА ФАЙЛА ===
+        function uploadFile() {
+            const btn = $('#uploadBtn');
+            btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Обработка...');
+            const formData = new FormData($('#uploadForm')[0]);
+            $.ajax({
+                url: '/Home/UploadFile',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: response => {
+                    $('#extractedData').hide();
+                    extractedItems = [];
+                    excludedItems.clear();
+                    if (response.success) {
+                        $('#results').html(`<div class="result-box success">
+                            <i class="fas fa-check-circle"></i> Успешно! Найдено <strong>${response.count}</strong> элементов
+                        </div>`);
+                        if (response.data?.length > 0) {
+                            extractedItems = response.data.map(s => s.trim()).filter(Boolean);
+                            $('#extractedData').show();
+                            renderExtractedList();
+                            renderExcludeList();
+                        }
+                    } else {
+                        $('#results').html(`<div class="result-box warning">
+                            <i class="fas fa-exclamation-triangle"></i> ${response.message}
+                        </div>`);
+
+                        /* $('#results').html(`<div class="alert alert-warning">${response.message || 'Ошибка обработки'}</div>`); */
+                    }
+                },
+                error: () => {
+                    $('#results').html(`<div class="result-box error">
+                        <i class="fas fa-times-circle"></i> Ошибка обработки файла
+                    </div>`);
+
+                    /* $('#results').html('<div class="alert alert-danger">Ошибка сервера</div>'); */
+                },
+                complete: () => {
+                    btn.html('Загрузить и обработать')
+                        .prop('disabled', !$('input[name="File"]')[0].files.length);
+                }
+            });
+        }
+        // === КОПИРОВАНИЕ С УЧЁТОМ ИСКЛЮЧЕНИЙ ===
+        $('#copyToGroupBtn').on('click', () => {
+            const itemsToCopy = extractedItems
+                .filter(item => !excludedItems.has(item))
+                .slice(0, MAX_ITEMS);
+            $textarea.val(itemsToCopy.join('\n'));
+            updateItemsCounter();
+            updateCreateGroupButtonState();
+            const btn = $('#copyToGroupBtn');
+            btn.removeClass('btn-primary').addClass('btn-success').html('Скопировано!');
+            setTimeout(() => {
+                btn.removeClass('btn-success').addClass('btn-primary');
+                updateCopyButtonText();
+            }, 2000);
+        });
+        // === ВСЁ ОСТАЛЬНОЕ (без изменений) ===
+        $('input[name="File"]').on('change', function () {
+            $('#uploadBtn').prop('disabled', !this.files.length);
+        });
+        setInterval(() => {
+            $.post('/Home/CheckAuth', {}, r => {
+                if (!r.authenticated) {
+                    alert('Сессия истекла. Перенаправление...');
+                    location.href = '/Home/Index';
+                }
+            });
+        }, 300000);
+        // Функция для загрузки количества элементов в группе
+        async function loadGroupItemCount(groupName, isUrlGroup) {
+            try {
+                const response = await fetch('/Home/GetGroupItemCount?groupName=' + encodeURIComponent(groupName) + '&isUrlGroup=' + isUrlGroup);
+                if (response.ok) {
+                    const count = await response.json();
+                    $('#selectedGroupCount').text(count);
+                    $('#groupItemCount').show();
+                } else {
+                    $('#groupItemCount').hide();
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки количества элементов:', error);
+                $('#groupItemCount').hide();
+            }
+        }
+
+        // Обнови функцию loadGroups
+        function loadGroups(isUrl) {
+            const url = isUrl ? '/Home/GetUrlGroups' : '/Home/GetIpGroups';
+            const $select = $('#existingGroupSelect');
+            $select.empty().append('<option value="">Загрузка...</option>');
+    
+            fetch(url)
+                .then(r => r.json())
+                .then(groups => {
+                    $select.empty().append('<option value="">Выберите существующую группу...</option>');
+                    if (Array.isArray(groups) && groups.length > 0) {
+                        groups.forEach(g => $select.append(`<option value="${g}">${g}</option>`));
+                    } else {
+                        $select.append('<option value="" disabled>(пусто)</option>');
+                    }
+                    $('#groupItemCount').hide(); // Скрываем при загрузке новых групп
+                })
+                .catch(() => $select.html('<option value="">Ошибка загрузки</option>'))
+                .finally(updateCreateGroupButtonState);
+        }
+
+        // Обработчик изменения выбора группы
+        $(document).on('change', '#existingGroupSelect', function() {
+            const selectedGroup = $(this).val();
+            const isUrlGroup = $('select[name="IsUrlGroup"]').val() === 'true';
+    
+            if (selectedGroup) {
+                loadGroupItemCount(selectedGroup, isUrlGroup);
+            } else {
+                $('#groupItemCount').hide();
+            }
+        });
+
+        // Также обновляй при смене типа группы
+        $(document).on('change', 'select[name="IsUrlGroup"]', function() {
+            $('#groupItemCount').hide(); // Скрываем при смене типа группы
+        });
+        function updateItemsCounter() {
+            const lines = $textarea.val().split('\n').map(s => s.trim()).filter(s => s);
+            const count = lines.length;
+            $counter.text(count);
+            if (count >= MAX_ITEMS) {
+                $counterWrapper.html(`<span class="text-danger fw-bold">${count}</span> / <span class="text-danger">900</span> (лимит)`);
+            } else if (count >= 700) {
+                $counterWrapper.html(`<span class="text-warning fw-bold">${count}</span> / 900`);
+            } else {
+                $counterWrapper.html(`<span class="text-success fw-bold">${count}</span> / 900`);
+            }
+            if (count > MAX_ITEMS) {
+                $('#createGroupBtn').prop('disabled', true);
+                if (!$('#itemsCounter').data('warn')) {
+                    alert(`Максимум 900 элементов! У вас: ${count}`);
+                    $('#itemsCounter').data('warn', true);
+                }
+            } else {
+                $('#itemsCounter').data('warn', false);
+                updateCreateGroupButtonState();
+            }
+        }
+        function updateCreateGroupButtonState() {
+            const count = $textarea.val().trim().split('\n').filter(s => s.trim()).length;
+            const hasItems = count > 0 && count <= MAX_ITEMS;
+            const existing = $('#existingGroupSelect').val();
+            const createNew = $('#createNewGroupCheck').is(':checked') && $('#newGroupName').val().trim();
+            $('#createGroupBtn').prop('disabled', !(hasItems && (existing || createNew)));
+        }
+        function createGroup() {
+            const btn = $('#createGroupBtn');
+
+            if (btn.prop('disabled') || btn.data('submitting')) return;
+
+            btn.data('submitting', true)
+                .html('<span class="spinner-border spinner-border-sm me-2"></span>Обработка...');
+
+            const itemsText = $('textarea[name="Items"]').val().trim();
+            const items = itemsText.split('\n')
+                .map(s => s.trim())
+                .filter(s => s.length > 0);
+
+            if (items.length === 0) {
+                $('#groupResults')
+                    .removeClass('d-none success error warning')
+                    .addClass('result-box warning')
+                    .html('<i class="fas fa-exclamation-triangle me-2"></i>Введите хотя бы один элемент!');
+                btn.data('submitting', false)
+                    .html('<i class="fas fa-plus-circle me-2"></i>Создать / обновить группу');
+                return;
+            }
+
+            if (items.length > 900) {
+                $('#groupResults')
+                    .removeClass('d-none success warning')
+                    .addClass('result-box error')
+                    .html(`<i class="fas fa-times-circle me-2"></i>Превышен максимальный лимит в 900 элементов. Сейчас: <strong>${items.length}</strong>. Удалите лишние строки.`);
+                btn.data('submitting', false)
+                    .html('<i class="fas fa-plus-circle me-2"></i>Создать / обновить группу');
+                return;
+            }
+
+            let groupName;
+            const createNew = $('#createNewGroupCheck').is(':checked');
+
+            if (createNew) {
+                groupName = $('#newGroupName').val().trim();
+                if (!groupName) {
+                    $('#groupResults')
+                        .removeClass('d-none success warning')
+                        .addClass('result-box error')
+                        .html('<i class="fas fa-times-circle me-2"></i>Введите название новой группы!');
+                    btn.data('submitting', false)
+                        .html('<i class="fas fa-plus-circle me-2"></i>Создать / обновить группу');
+                    return;
+                }
+            } else {
+                groupName = $('#existingGroupSelect').val();
+                if (!groupName) {
+                    $('#groupResults')
+                        .removeClass('d-none success warning')
+                        .addClass('result-box error')
+                        .html('<i class="fas fa-times-circle me-2"></i>Выберите существующую группу или включите «Создать новую группу».');
+                    btn.data('submitting', false)
+                        .html('<i class="fas fa-plus-circle me-2"></i>Создать / обновить группу');
+                    return;
+                }
+            }
+
+            const data = {
+                GroupName: groupName,
+                Description: $('input[name="Description"]').val().trim(),
+                IsUrlGroup: $('select[name="IsUrlGroup"]').val() === 'true',
+                Items: items
+            };
+
+            // Индикатор выполнения справа
+            $('#groupResults')
+                .removeClass('d-none success error warning')
+                .addClass('result-box loading')
+                .html(`
+                    <i class="fas fa-cog fa-spin me-2"></i>
+                    <span>Создание / обновление группы...</span>
+                `);
+
+            $.ajax({
+                url: '/Home/CreateGroup',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(data),
+                success: resp => {
+                    const ok = resp.success;
+                    $('#groupResults')
+                        .removeClass('d-none success error warning loading')
+                        .addClass(`result-box ${ok ? 'success' : 'error'}`)
+                        .html(`
+                            <i class="fas fa-${ok ? 'check-circle' : 'times-circle'} me-2"></i>
+                            <span>${resp.message}</span>
+                        `);
+
+                    if (ok) {
+                        // 1. Сбрасываем форму
+                        $('#groupForm')[0].reset();
+                        $('#createNewGroupCheck').prop('checked', false);
+                        $('#newGroupNameWrapper').hide();
+                        $('#existingGroupSelect').prop('disabled', false);
+
+                        // 2. Восстанавливаем селектор типа группы
+                        $('select[name="IsUrlGroup"]').val(data.IsUrlGroup ? 'true' : 'false');
+
+                        // 3. Обновляем надпись "Сейчас выбрано" (если есть такой элемент)
+                        $('#currentGroupType').text(data.IsUrlGroup ? 'URL-группы' : 'IP-группы');
+
+                        // 4. Перезагружаем список групп
+                        loadGroups(data.IsUrlGroup);
+
+                        // 5. Чистим textarea
+                        $('textarea[name="Items"]').val('');
+                        updateCreateGroupButtonState();
+                    }
+                },
+                error: () => {
+                    $('#groupResults')
+                        .removeClass('d-none success warning')
+                        .addClass('result-box error')
+                        .html('<i class="fas fa-times-circle me-2"></i>Ошибка сервера при создании / обновлении группы.');
+                },
+                complete: () => {
+                    btn.data('submitting', false)
+                        .html('<i class="fas fa-plus-circle me-2"></i>Создать / обновить группу');
+                }
+            });
+        }
+
+        // Функция для показа уведомлений
+        function showNotification(type, title, message) {
+            const icons = {
+                success: 'fa-check-circle',
+                warning: 'fa-exclamation-triangle',
+                error: 'fa-times-circle',
+                info: 'fa-info-circle'
+            };
+    
+            const notification = $(`
+                <div class="notification ${type}">
+                    <i class="fas ${icons[type]}"></i>
+                    <div class="notification-content">
+                        <div class="notification-title">${title}</div>
+                        <div class="notification-message">${message}</div>
+                    </div>
+                </div>
+            `);
+    
+            $('#notifications').append(notification);
+    
+            // Автоматическое удаление через 3 секунды
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        // Функция для загрузки глобальных исключений в модальное окно
+        async function loadGlobalExcludes() {
+            try {
+                const response = await fetch('/Home/GetGlobalExcludes');
+                if (response.ok) {
+                    const excludes = await response.json();
+                    renderGlobalExcludesList(excludes);
+                    updateGlobalExcludesStats(excludes);
+                } else {
+                    showNotification('error', 'Ошибка', 'Не удалось загрузить глобальные исключения');
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки глобальных исключений:', error);
+                showNotification('error', 'Ошибка', 'Не удалось загрузить глобальные исключения');
+            }
+        }
+
+        // Функция для отрисовки списка в модальном окне
+        function renderGlobalExcludesList(excludes) {
+            const $list = $('#globalExcludesList');
+            const $emptyMessage = $('#emptyExcludesMessage');
+    
+            if (!excludes || excludes.length === 0) {
+                $list.empty();
+                $emptyMessage.removeClass('d-none');
+                return;
+            }
+    
+            $emptyMessage.addClass('d-none');
+    
+            const html = excludes.map((item, index) => `
+                <tr class="exclude-item">
+                    <td class="text-muted">${index + 1}</td>
+                    <td>
+                        <code class="text-break">${item.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</code>
+                    </td>
+                    <!-- В таблице -->
+                    <td class="text-center">
+                        <center><button type="button" class="btn btn-outline-danger table-action-btn remove-global-exclude" 
+                                data-item="${item.replace(/"/g, '&quot;')}"
+                                title="Удалить из исключений">
+                            <i class="fas fa-times"></i>
+                        </button></center>
+                    </td>
+                </tr>
+            `).join('');
+    
+            $list.html(html);
+        }
+
+        // Функция для обновления статистики
+        function updateGlobalExcludesStats(excludes) {
+            const count = excludes ? excludes.length : 0;
+            $('#globalExcludesCount').text(count);
+    
+            // Информация о файле (можно добавить реальные данные с сервера)
+            const fileInfo = count > 0 ? `${count} записей` : 'Файл пуст';
+            $('#globalExcludesFileInfo').text(fileInfo);
+        }
+
+        // Поиск в исключениях
+        $('#searchExcludes').on('input', function() {
+            const searchTerm = $(this).val().toLowerCase();
+            $('.exclude-item').each(function() {
+                const text = $(this).find('code').text().toLowerCase();
+                $(this).toggle(text.includes(searchTerm));
+            });
+        });
+
+        // Обработчики событий
+        $(document).on('click', '#viewGlobalExcludesBtn', function() {
+            loadGlobalExcludes();
+            $('#globalExcludesModal').modal('show');
+        });
+
+        $(document).on('click', '#refreshExcludesBtn', function() {
+            loadGlobalExcludes();
+            showNotification('info', 'Обновлено', 'Список исключений обновлен');
+        });
+
+        $(document).on('click', '.remove-global-exclude', async function() {
+            const item = $(this).data('item');
+    
+            if (confirm(`Удалить "${item}" из глобальных исключений?`)) {
+                try {
+                    const response = await fetch('/Home/RemoveGlobalExclude', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(item)
+                    });
+            
+                    if (response.ok) {
+                        const result = await response.json();
+                        if (result.success) {
+                            showNotification('success', 'Удалено', `"${item}" удален из глобальных исключений`);
+                            loadGlobalExcludes(); // Перезагружаем список
+                        } else {
+                            showNotification('error', 'Ошибка', result.message || 'Не удалось удалить');
+                        }
+                    }
+                } catch (error) {
+                    showNotification('error', 'Ошибка', 'Не удалось удалить исключение');
+                }
+            }
+        });
+
+        $(document).on('click', '#clearAllExcludesBtn', function() {
+            if (confirm('Очистить ВСЕ глобальные исключения? Это действие нельзя отменить.')) {
+                // Вызов метода для очистки всех исключений
+                clearAllGlobalExcludes();
+            }
+        });
+
+        // Функция очистки всех исключений
+        async function clearAllGlobalExcludes() {
+            try {
+                const response = await fetch('/Home/ClearAllExcludes', {
+                    method: 'POST'
+                });
+        
+                if (response.ok) {
+                    const result = await response.json();
+                    if (result.success) {
+                        showNotification('success', 'Очищено', 'Все глобальные исключения удалены');
+                        loadGlobalExcludes(); // Перезагружаем список
+                        $('#globalExcludesModal').modal('hide');
+                    } else {
+                        showNotification('error', 'Ошибка', result.message || 'Не удалось очистить');
+                    }
+                }
+            } catch (error) {
+                showNotification('error', 'Ошибка', 'Не удалось очистить исключения');
+            }
+        }
+
+        $(function () {
+            $('#uploadBtn').on('click', uploadFile);
+            $('#createGroupBtn').on('click', createGroup);
+            $('#existingGroupSelect, #newGroupName, #itemsTextarea, #createNewGroupCheck')
+                .on('input change keyup paste', updateCreateGroupButtonState);
+            $('#createNewGroupCheck').on('change', function () {
+                $('#newGroupNameWrapper').toggle(this.checked);
+                $('#existingGroupSelect').prop('disabled', this.checked);
+                if (this.checked) $('#newGroupName').focus();
+                updateCreateGroupButtonState();
+            });
+            $('select[name="IsUrlGroup"]').on('change', function () {
+                loadGroups(this.value === 'true');
+            });
+            $textarea.on('input paste keyup', () => setTimeout(updateItemsCounter, 0));
+            $textarea.on('paste', () => {
+                setTimeout(() => {
+                    const lines = $textarea.val().split('\n').map(s => s.trim()).filter(s => s);
+                    if (lines.length > MAX_ITEMS) {
+                        $textarea.val($textarea.val().split('\n').slice(0, MAX_ITEMS).join('\n'));
+                        updateItemsCounter();
+                    }
+                }, 0);
+            });
+            loadGroups(false);
+            updateItemsCounter();
+        });
+    </script>
+}

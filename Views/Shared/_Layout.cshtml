@@ -1,0 +1,225 @@
+﻿@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+@{
+    var isAuthenticated = HttpContextAccessor.HttpContext?.Session.GetString("IsAuthenticated") == "true";
+}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@ViewData["Title"] - Kerio Control Web</title>
+    <!-- Bootstrap 5 + Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+    <!-- Моноширинный шрифт (по желанию) -->
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        .logout-btn {
+            background: var(--danger);
+            color: white !important;
+            border: none;
+            padding: 0.6rem 1.4rem;
+            font-weight: 600;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 12px rgba(239, 71, 111, 0.3);
+            transition: .25s;
+        }
+
+        .logout-btn:hover {
+            background: #d63d63;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 18px rgba(239, 71, 111, 0.4);
+        }
+
+        :root {
+            --primary: #4361ee;
+            --success: #06d6a0;
+            --warning: #ff9f1c;
+            --danger: #ef476f;
+            --dark: #2a2a3b;
+            --light: #f8f9fa;
+            --gray-100: #f1f3f5;
+            --gray-200: #e9ecef;
+            --gray-600: #6c757d;
+            --gray-800: #343a40;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+
+        .navbar {
+            background: rgba(255, 255, 255, 0.9) !important;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 4px 20px rgba(67, 97, 238, 0.1);
+            padding: 1rem 0;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: var(--primary) !important;
+            transition: all 0.3s ease;
+        }
+
+        .navbar-brand:hover {
+            transform: scale(1.05);
+        }
+
+        .nav-link {
+            font-weight: 600;
+            color: var(--gray-800) !important;
+            padding: 0.7rem 1.2rem !important;
+            border-radius: 0.75rem;
+            transition: all 0.25s ease;
+        }
+
+        .nav-link:hover {
+            background: rgba(67, 97, 238, 0.1);
+            color: var(--primary) !important;
+            transform: translateY(-2px);
+        }
+
+        .nav-link.active {
+            background: var(--primary) !important;
+            color: white !important;
+            box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3);
+        }
+
+
+        .btn-logout:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(239, 71, 111, 0.3);
+        }
+
+        #kerioTime {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1rem;
+            color: var(--gray-600);
+            background: var(--gray-100);
+            padding: 0.4rem 0.8rem;
+            border-radius: 0.5rem;
+        }
+
+        main {
+            padding-top: 3rem;
+            padding-bottom: 5rem;
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        <text >
+        @@keyframes pulse {
+            0%
+
+        {
+            box-shadow: 0 0 0 0 rgba(67, 97, 238, 0.5);
+        }
+
+        70% {
+            box-shadow: 0 0 0 14px rgba(67, 97, 238, 0);
+        }
+
+        100% {
+            box-shadow: 0 0 0 0 rgba(67, 97, 238, 0);
+        }
+
+        }
+        </text >
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-lg">
+            <div class="container-fluid px-5">
+                <a class="navbar-brand" asp-controller="Home" asp-action="@(isAuthenticated ? "Dashboard" : "Index")">
+                    <i class="fas fa-shield-alt me-2 pulse"></i>Kerio Control
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        @if (isAuthenticated)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link @(ViewContext.RouteData.Values["Action"].ToString() == "Dashboard" ? "active" : "")" asp-action="Dashboard">
+                                    <i class="fas fa-tachometer-alt me-2"></i>Панель
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link @(ViewContext.RouteData.Values["Action"].ToString() == "Sensors" ? "active" : "")" asp-action="Sensors">
+                                    <i class="fas fa-microchip me-2"></i>Сенсоры
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link @(ViewContext.RouteData.Values["Action"].ToString() == "DnsAndAntivirus" ? "active" : "")" asp-action="DnsAndAntivirus">
+                                    <i class="fas fa-shield-virus me-2"></i>DNS/Антивирус
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link @(ViewContext.RouteData.Values["Action"].ToString() == "Logs" ? "active" : "")" asp-action="Logs">
+                                    <i class="fas fa-file-alt me-2"></i>Логи
+                                </a>
+                            </li>
+                        }
+                        else
+                        {
+                            /*<li class="nav-item">
+                                <span class="nav-link text-muted">Войдите в систему</span>
+                            </li> */
+                        }
+                        <li class="nav-item">
+                            <a class="nav-link @(ViewContext.RouteData.Values["Action"].ToString() == "Ping" ? "active" : "")" asp-action="Ping">
+                                <i class="fas fa-signal me-2"></i>Пинг
+                            </a>
+                        </li>
+                    </ul>
+                    @if (isAuthenticated)
+                    {
+                        <div class="d-flex align-items-center gap-3">
+                            <span id="kerioTime" class="text-nowrap">Синхронизирован: ...</span>
+                            <a asp-action="Logout" class="logout-btn">
+                                <i class="fas fa-sign-out-alt me-2"></i>Выйти
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </nav>
+    </header>
+    <main class="container-fluid px-5">
+        @RenderBody()
+    </main>
+    <!-- Scripts внизу для скорости -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+    <script>
+        // Обновление времени Kerio
+        async function updateKerioTime() {
+            try {
+                const res = await fetch('@Url.Action("GetKerioTime", "Home")');
+                if (res.ok) {
+                    const time = await res.text();
+                    document.getElementById("kerioTime").innerText = `Синхронизирован: ${time}`;
+                } else {
+                    throw new Error();
+                }
+            } catch {
+                document.getElementById("kerioTime").innerText = "Синхронизирован: недоступно";
+            }
+        }
+        // Запуск
+        updateKerioTime();
+        setInterval(updateKerioTime, 30000); // каждые 30 сек — разумно
+    </script>
+</body>
+</html>
