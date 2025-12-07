@@ -89,7 +89,7 @@
 3. Скопируйте файл `ioc_service.py`
 4. Установите зависимости:  
 ```powershell
-& "C:\Users\<USER>\AppData\Local\Programs\Python\Python310\python.exe" -m pip install fastapi uvicorn PyPDF2 python-multipart
+& "C:\Users\<USER>\AppData\Local\Programs\Python\Python<VERSION>\python.exe" -m pip install fastapi uvicorn PyPDF2 python-multipart
 ```
 ### 3️⃣ NSSM — создание службы
 1. Имя: IocPythonService
@@ -98,6 +98,7 @@
 4. Startup Dir: C:\PythonIocService
 5. Environment:
 ```powershell
-PATH=C:\Users\<USER>\AppData\Local\Programs\Python\Python310;C:\Users\<USER>\AppData\Local\Programs\Python\Python310\Scripts
+PATH=C:\Users\<USER>\AppData\Local\Programs\Python\Python<VERSION>;C:\Users\<USER>\AppData\Local\Programs\Python\Python<VERSION>\Scripts
 PYTHONPATH=C:\PythonIocService
 ```
+<USER> и <VERSION> - ОБЯЗАТЕЛЬНО СМЕНИТЬ НА СВОИ!
