@@ -50,7 +50,7 @@
 ## 🚀 Быстрый старт
 
 ### 1️⃣ Установка и запуск
-1. Установите программу  
+1. Установите программу https://drive.google.com/file/d/19H3v7fep5ORZqVtX67cuAP6MaF7YDqjB/view?usp=sharing  
 2. Запустите `.exe`  
 3. Откройте [https://localhost:7135/](https://localhost:7135/)  
 4. Код проекта: [GitHub](https://github.com/gamers65/KerioControlWeb)  
