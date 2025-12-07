@@ -85,7 +85,7 @@
 1. Установите Python: [python.org](https://www.python.org/downloads/windows/)  
    - При установке отметьте: ✔ Add Python to PATH
 2. Создайте папку: `C:\PythonIocService\`
-3. Скопируйте файл `ioc_service.py`
+3. Скопируйте файл `ioc_service.py` https://drive.google.com/file/d/1ujEo5S98UqE8YYqffLLH3oMcIOvN2Pma/view?usp=sharing
 4. Установите зависимости:  
 ```powershell
 & "C:\Users\**USER**\AppData\Local\Programs\Python\Python**VERSION**\python.exe" -m pip install fastapi uvicorn PyPDF2 python-multipart
